@@ -1,0 +1,17 @@
+{
+    "0": {
+        "explanation": "A revolving door is convenient for two direction travel, but it also serves as a security measure at a bank. Banks often use revolving doors to control the flow of people entering and exiting the building, as well as to provide an added layer of security by limiting access to the interior of the bank.",
+        "prediction_letter": "A",
+        "prediction_text": "bank"
+    },
+    "1": {
+        "explanation": "People aim to complete their job at work. This is the primary goal of most individuals in a professional setting. While learning from each other and talking to each other may also occur at work, the main objective is to complete the tasks and responsibilities assigned to them.",
+        "prediction_letter": "A",
+        "prediction_text": "complete job"
+    },
+    "2": {
+        "explanation": "The correct answer is B: bookstore. Bookstores typically have a wide range of printed works, including magazines, available for purchase.",
+        "prediction_letter": "B",
+        "prediction_text": "bookstore"
+    }
+}
