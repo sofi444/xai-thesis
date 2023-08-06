@@ -205,5 +205,3 @@ ipython_config.py
 
 # my tmp files
 tmp*
-outputs/*
-feature_extraction/*
