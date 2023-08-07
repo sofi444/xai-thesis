@@ -11,9 +11,6 @@ NOTES:
 
 TO DO:
 - fix response: only one correct answer
-- fix response: only first instance gets an explanation, the following just the answer
-- try with output formatting
-- think: output formatting in prompt or external
 - think: chat vs completion models
 '''
 
