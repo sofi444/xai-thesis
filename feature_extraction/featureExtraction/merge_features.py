@@ -12,7 +12,6 @@ def merge_features(args):
 
     orig = pd.read_csv(os.path.join(PATH_PREFIX, args.input_path))
 
-    '''Ignore polarity features. There is no script for this'''
     pol = pd.read_csv(os.path.join(PATH_PREFIX, args.polarity))
     # add column commentID to pol (it is column filename with .txt removed)
     pol[args.idcol] = pol["filename"].apply(lambda x: x[:-4])
