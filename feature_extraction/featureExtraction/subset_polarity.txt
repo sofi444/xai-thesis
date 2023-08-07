@@ -1,6 +1,7 @@
 action_component
 affect_friends_and_family_component
-certainty_component economy_component
+certainty_component
+economy_component
 failure_component
 fear_and_digust_component
 joy_component

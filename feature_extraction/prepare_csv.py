@@ -4,9 +4,17 @@ import argparse
 import pandas as pd
 
 
+
 def json_to_csv(args):
 
-    with open(os.path.join(args.path, args.filename), "r") as f:
+    if args.dir_path is None:
+        # path of project directory
+        PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        filepath = os.path.join(PROJECT_DIR, "responses", args.filename)
+    else:
+        filepath = os.path.join(args.dir_path, args.filename)
+
+    with open((filepath), "r") as f:
         json_data = json.load(f) # dict
     
     column_names = ["idx", "response"]
@@ -16,9 +24,10 @@ def json_to_csv(args):
     # the values for the column 'response' are the values of the json dict
     df = pd.DataFrame(columns=column_names, data=json_data.items())
     
-    # save in original output directory (?)
-    csv_path = os.path.join(args.path, args.filename.split(".")[0] + ".csv")
-    df.to_csv(csv_path, index=False)
+    # save within feature_extraction dir
+    OUT_DIR = os.path.join(PROJECT_DIR, "feature_extraction/responses-fe")
+    out_path = os.path.join(OUT_DIR, args.filename.split(".")[0] + ".csv")
+    df.to_csv(out_path, index=False)
 
 
 
@@ -36,9 +45,9 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--path",
+        "--dir_path",
         type=str,
-        default="/Users/q616967/Workspace/bmw/xai_sofia_casadei_master_thesis/responses",
+        default=None,
         help="path to the json file. dafault is the responses folder in the project directory"
     )
     
