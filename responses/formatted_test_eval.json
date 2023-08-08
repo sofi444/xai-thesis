@@ -1,0 +1,32 @@
+{
+    "0": {
+        "prediction_letter": "C",
+        "prediction_text": "A DEPARTMENT STORE!",
+        "explanation": "A revolving door is a common feature in department stores, and it serves as a security measure to prevent shoplifting and other forms of theft. The rotating door makes it difficult for customers to exit the store without passing through the checkout area, which helps to deter theft.",
+        "outcome": false
+    },
+    "1": {
+        "prediction_letter": "B",
+        "prediction_text": "People aim to learn from each other at work.",
+        "explanation": "When people go to work, they aim to do various things, such as completing tasks, learning new skills, and collaborating with their colleagues. However, the primary goal of going to work is to learn from each other and improve one's abilities. This can include learning new techniques, gaining new knowledge, and developing new perspectives.",
+        "outcome": false
+    },
+    "2": {
+        "prediction_letter": "B",
+        "prediction_text": "bookstore",
+        "explanation": "The most likely place to find magazines alongside many other printed works would be a bookstore, as mentioned in the text.",
+        "outcome": true
+    },
+    "3": {
+        "prediction_letter": "A",
+        "prediction_text": "Fast food restaurant",
+        "explanation": "Option A is a fast food restaurant, and it's likely that they would have hamburgers on the menu.",
+        "outcome": true
+    },
+    "4": {
+        "prediction_letter": "D",
+        "prediction_text": "Farming areas",
+        "explanation": "Based on the criteria mentioned above, farming areas seem to be the best option for James. Although other options like the Midwest and the countryside have some advantages, farming areas are specifically designated for farming and offer the potential for productive farming land. However, other factors such as soil quality, water availability, and local regulations should also be considered.",
+        "outcome": false
+    }
+}
