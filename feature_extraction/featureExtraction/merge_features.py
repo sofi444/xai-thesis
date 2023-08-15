@@ -10,16 +10,21 @@ PATH_PREFIX = os.path.join(PROJECT_DIR, "feature_extraction/featureExtraction")
 
 def merge_features(args):
 
-    orig = pd.read_csv(os.path.join(PATH_PREFIX, args.input_path))
+    if args.input_path is not None:
+        # start df from original data (full responses and ids)
+        orig = pd.read_csv(os.path.join(PATH_PREFIX, args.input_path))
 
     pol = pd.read_csv(os.path.join(PATH_PREFIX, args.polarity))
     # add column commentID to pol (it is column filename with .txt removed)
     pol[args.idcol] = pol["filename"].apply(lambda x: x[:-4])
     # convert idcol in taaled to int to avoid ValueError when merging
     pol[args.idcol] = pol[args.idcol].astype(int)
-    # merge orig and pol on idcol, only keep columns from pol that are not in orig
-    merged = pd.merge(orig, pol, on=args.idcol, how="left", suffixes=("", "_pol"))
-    #merged = orig
+
+    if args.input_path is not None:
+        # merge orig and pol on idcol, only keep columns from pol that are not in orig
+        merged = pd.merge(orig, pol, on=args.idcol, how="left", suffixes=("", "_pol"))
+    else:
+        merged = pol # if not adding the original text
 
     '''Ignore taales features. It does not work'''
     #taales = pd.read_csv(taales)
@@ -46,7 +51,10 @@ def merge_features(args):
     syntax_cols.append(args.idcol)
     merged = pd.merge(merged, syntax[syntax_cols], on=args.idcol, how="left", suffixes=("", "_syntax"))
     
-    #print(tabulate(merged.head(), headers="keys", tablefmt="psql"))
+    # drop text column, and filenames
+    merged = merged.drop(columns=['response', 'filename', 'filename_taaled'])
+    # drop columns (features) that are all 0 or NaN
+    merged = merged.loc[:, (merged != 0).any(axis=0)].dropna(axis=1, how="all")
 
     if args.filter:
         merged = filter_dataframe(merged)
@@ -84,7 +92,7 @@ if __name__ == '__main__':
     '''All paths are relative to featureExtraction directory'''
 
     parser.add_argument("-i", "--input_path", dest="input_path", help="path to input file",
-                        )
+                        default=None)
     parser.add_argument("-id", "--idcol", dest="idcol", help="name of id column",
                         default="idx")
     parser.add_argument("-su", "--surface", dest="surface", help="path to surface features",

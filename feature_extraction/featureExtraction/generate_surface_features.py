@@ -49,13 +49,20 @@ def pipeline(input_path, model_identifier, output_path, comment_column):
 
 
 if __name__ == '__main__':
-    # parse arguments, input_path, output_path
     parser = ArgumentParser()
-    parser.add_argument("-i", "--input_path", dest="input_path", help="path to input file")
-    parser.add_argument("-o", "--output_path", dest="output_path", help="path to output file")
-    # which column stores the comments?
-    parser.add_argument("-c", "--comment_column", dest="comment_column", help="name of column that stores comments")
-    # add spacy model as optional argument with default value
-    parser.add_argument("-m", "--model", dest="model", help="spacy model to use", default="en_core_web_sm")
+
+    parser.add_argument("--input_path", 
+                        default=None,
+                        help="path to input file")
+    parser.add_argument("--output_path",
+                        default="output/SYNTAX_results.csv",
+                        help="path to output file")
+    parser.add_argument("--comment_column",
+                        default="response",
+                        help="name of column that stores comments i.e., text")
+    parser.add_argument("--model",
+                        default="en_core_web_sm",
+                        help="spacy model to use")
+
     args = parser.parse_args()
     pipeline(args.input_path, args.model, args.output_path, args.comment_column)
