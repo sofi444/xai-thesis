@@ -1,8 +1,6 @@
 import os
 import json
-import gzip
 import argparse
-import tqdm
 
 import utils.data
 
@@ -30,25 +28,48 @@ def save_predictions_with_outcome(predictions_with_outcome:dict, args):
 
 
 
+def ensure_id_match(map_filename:str, predictions, data):
+    map_path = os.path.join(PROJECT_DIR, "processed_uuids", map_filename)
+    with open(map_path, "r") as f:
+        map = json.load(f)
+    
+    for pred_idx in predictions.keys():
+        # fetch corresponding uuid
+        uuid = map[pred_idx]
+        # fetch corresponding data
+        if not uuid == data[int(pred_idx)]['id']:
+            return False
+        
+    return True
+
+
+
 def evaluate_CoQA(args):
     data = utils.data.load_data(split='dev', dataset='commonsenseQA', full_run=True)
     data = utils.data.flatten_CoQA_comprehension(data) # list
     predictions = load_predictions(args.predictions_filename) # dict
-    predictions_with_outcome = {}
 
-    for idx, pred_dict in tqdm.tqdm(predictions.items()): # idx is a string
-        pred = pred_dict["prediction_letter"]
-        gold = data[int(idx)]["answerKey"]
-        #print(pred, gold, pred_dict, data[int(idx)]["stem"])
+    if ensure_id_match(args.idmap_filename, predictions, data):
+        
+        predictions_with_outcome = {}
 
-        if pred == gold:
-            pred_dict['outcome'] = True
-        else: # catches wrong predictions and errors (ERROR:...)
-            pred_dict['outcome'] = False
+        for idx, pred_dict in predictions.items(): # idx is a string
+            pred = pred_dict["answer_letter"]
+            gold = data[int(idx)]["answerKey"]
+            #print(pred, gold, pred_dict, data[int(idx)]["stem"])
+            
 
-        predictions_with_outcome[idx] = pred_dict
-    
-    save_predictions_with_outcome(predictions_with_outcome, args)
+            if pred == gold:
+                pred_dict['outcome'] = True
+            else: # catches wrong predictions and errors (ERROR:...)
+                pred_dict['outcome'] = False
+
+            predictions_with_outcome[idx] = pred_dict
+        
+        save_predictions_with_outcome(predictions_with_outcome, args)
+
+    else:
+        print("Error: ID mismatch between predictions and data.")
     
 
 
@@ -59,6 +80,9 @@ if __name__ == "__main__":
     parser.add_argument("--predictions_filename",
                         type=str,
                         default="formatted_test.json")
+    parser.add_argument("--idmap_filename",
+                        type=str,
+                        default="uuids_14081857.json")
     
     args = parser.parse_args()
     evaluate_CoQA(args)
