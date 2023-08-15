@@ -205,3 +205,6 @@ ipython_config.py
 
 # my tmp files
 tmp*
+processed_uuid/*
+feature_extraction/featureExtraction/textfiles/*
+feature_extraction/featureExtraction/outputs/*
