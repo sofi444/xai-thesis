@@ -21,7 +21,7 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 
-def load_model(model:str, use_azure:bool=False, env_dict:dict=None):
+def load_model(model:str="OpenAI-chat-default", use_azure:bool=False, env_dict:dict=None):
 
     if use_azure:
         if model == "OpenAI-chat-default":
@@ -44,11 +44,13 @@ def azure_chat_openai_langchain(env_dict):
         openai_api_version=env_dict["OPENAI_DEPLOYMENT_VERSION"],
         openai_api_key=env_dict["AZURE_OPENAI_KEY"],
         model=env_dict["OPENAI_MODEL_NAME"],
-        deployment_name=env_dict["OPENAI_DEPLOYMENT_NAME"])
+        deployment_name=env_dict["OPENAI_DEPLOYMENT_NAME"],
+        temperature=0)
 
 
 def chat_openai_langchain():
-    return ChatOpenAI(temperature = 0)
+    return ChatOpenAI(model_name= "gpt-3.5-turbo-0613", 
+                      temperature = 0)
 
 
 def llamacpp_langchain(model_path):

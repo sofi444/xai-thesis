@@ -46,7 +46,7 @@ def compose_template(template_name:str, templates:dict, for_llama2:bool, i_first
     i_first: if True, the instance comes first, then the sys prompt
     """
     sys = templates["sys"][template_name]
-    instance = templates["instance"]["eq_semic"]
+    instance = templates["instance"]["par_newl"]
 
     if for_llama2:
         return get_llama_prompt(sys, instance, i_first)
