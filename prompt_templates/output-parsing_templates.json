@@ -1,0 +1,5 @@
+{
+    "v1-test": "Convert the text into json. \n\nText: {text} \n\n {format_instructions}",
+    "v2": "Transform the free text into structured json, following the instructions and schema provided.\n\nText: {freetext_response}\n\n{format_instructions}",
+    "v3": "Transform the free text into structured json, following the instructions and schema provided. Do not add information that is not from the original text. The text is the response to a multiple choice question, which includes the reasoning before choosing a final answer. Sometimes the deliberation does not lead to an answer being chosen as the final answer.\n\nText: {freetext_response}\n\n{format_instructions}"
+}

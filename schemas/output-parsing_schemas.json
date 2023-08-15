@@ -1,0 +1,20 @@
+{
+    "v1": {
+        "prediction_letter": "This is the answer to the question. It is one letter (either A, B, C, D, or E), which corresponds to the answer chosen by the model.",
+        "prediction_text": "This is the answer to the question. It is the text of the answer chosen by the model.",
+        "explanation": "This is the explanation for the prediction. It is a piece of text explains why the model chose the answer it did."
+    },
+    "v2": {
+        "answer_letter": "the letter corresponding to the final answer.",
+        "answer_text": "the text corresponding to the final answer."
+    },
+    "v2-full": {
+        "answer_letter": "the letter corresponding to the final answer.",
+        "answer_text": "the text corresponding to the final answer.",
+        "full_text": "the full input (free-text) as is."
+    },
+    "v3": {
+        "answer_letter": "The letter corresponding to the final answer. For example, if the text mentions 'Answer G) penguing is the most likely', then this field is 'G'. If multiple final answers are given, such as 'G' and 'U', then this field is 'G,U'. If a final answer is not chosen, then this field is an empty string.",
+        "answer_text": "The word or short phrase corresponding to the final answer. For example, if the text mentions 'Answer G) feeding penguings is the most likely', then this field is 'feeding penguins'. In case of multiple final answers, they are separate by a comma. If the answer_letter field is empty, then this field is an empty string."
+    }
+}
