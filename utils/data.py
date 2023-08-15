@@ -13,10 +13,21 @@ DATA_DIR = os.path.join(PROJECT_DIR, 'data/') # xai_sofia_casadei_master_thesis/
 
 
 
-def load_data(split:str='dev', dataset:str='commonsenseQA', full_run:bool=False) -> List[Dict]:
-    ''' Load data split from gzip files '''
+def load_data(split:str='dev', dataset:str='commonsenseQA', full_run:bool=False, 
+              filtered:bool=True) -> List[Dict]:
 
     DATASET_DIR = os.path.join(DATA_DIR, dataset)
+
+    if filtered:
+        filename = os.path.join(DATASET_DIR, "dev_rand_split_filtered.jsonl")
+        with open(filename, "r") as f:
+            N = 700
+            data = []
+            for i, line in enumerate(f):
+                if i >= N:
+                    break
+                data.append(json.loads(line))
+            return data
 
     if split not in ['train', 'dev', 'test']:
         raise ValueError("split arg must be 'train', 'dev' or 'test'")
