@@ -13,47 +13,48 @@ DATA_DIR = os.path.join(PROJECT_DIR, 'data/') # xai_sofia_casadei_master_thesis/
 
 
 
-def load_data(split:str='dev', dataset:str='commonsenseQA', full_run:bool=False, 
+def load_data(split:str='dev', dataset:str='commonsenseQA', num_instances:int=None, 
               filtered:bool=True) -> List[Dict]:
 
     DATASET_DIR = os.path.join(DATA_DIR, dataset)
-
-    if filtered:
-        filename = os.path.join(DATASET_DIR, "dev_rand_split_filtered.jsonl")
-        with open(filename, "r") as f:
-            N = 700
-            data = []
-            for i, line in enumerate(f):
-                if i >= N:
-                    break
-                data.append(json.loads(line))
-            return data
-
+    
     if split not in ['train', 'dev', 'test']:
         raise ValueError("split arg must be 'train', 'dev' or 'test'")
     
-    filename = [f for f in os.listdir(DATASET_DIR) if split in f]
+    files_from_split = [f for f in os.listdir(DATASET_DIR) if split in f]
 
-    if len(filename) != 1:
-        logging.warning(f"There are multiple '{split}' files; using .gz file")
-        filename = [f for f in filename if '.gz' in f][0]
-        
+    if filtered:
+        filenames = [f for f in files_from_split if 'filtered' in f]
+    else:
+        filenames = files_from_split
+    
+    if len(filenames) == 1:
+        filename = filenames[0]
+    elif len(filenames) > 1:
+        # if both json and gz versions exist, load from gz
+        filename = [f for f in filenames if '.gz' in f][0]
+
+    if not filename:
+        raise FileNotFoundError(
+            f"Split: {split}, Filtered: {filtered}, Dir: {DATASET_DIR}"
+            )
     filepath = os.path.join(DATASET_DIR, filename)
 
-    with gzip.open(filepath, 'rb') as f:
-        
-        if not full_run: # test run, load only N instances
-            N = 5
-            data = []
-            for i, line in enumerate(f):
-                if i >= N:
-                    break
-                data.append(json.loads(line))
-
-        else: # full run, load all instances
-            data = [json.loads(line) for line in f]
+    print(f"Loading {num_instances if num_instances else 'all'} instances from {filepath}")
     
-    return data
+    if filename.endswith('.gz'):
+        with gzip.open(filepath, 'rb') as f:
+            if num_instances:
+                return [json.loads(line) for i, line in enumerate(f) if i < num_instances]
+            else:
+                return [json.loads(line) for line in f]
+
+    elif filename.endswith('.jsonl'):
+        with open(filepath, 'r') as f:
+            if num_instances:
+                return [json.loads(line) for i, line in enumerate(f) if i < num_instances]
+            else:
+                return [json.loads(line) for line in f]
 
 
 
@@ -109,10 +110,6 @@ def flatten_CoQA_comprehension(data: List[Dict]) -> List[Dict]:
 
 
 
-
-
-
-
 if __name__ == "__main__":
 
-    load_data(split='dev')
+    load_data(split='dev', num_instances=10)
