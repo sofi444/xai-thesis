@@ -37,7 +37,7 @@ def get_llama_prompt(sys_prompt:str, user_message:str, i_first:bool=False):
 
 
 # helper
-def compose_template(template_name:str, templates:dict, for_llama2:bool, i_first:bool=True):
+def compose_template(template_name:str, templates:dict, for_llama2:bool, i_first:bool=False):
     """
     Returns a template string composed of the sys prompt (the task) 
     and the instance (actual instance from the dataset).
