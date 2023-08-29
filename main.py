@@ -4,6 +4,7 @@ import pprint as pp
 import openai
 import os
 import tqdm
+import json
 
 from dotenv import load_dotenv, find_dotenv, dotenv_values
 
@@ -45,22 +46,18 @@ def main(args):
         openai.proxy = env_dict["HTTP_PROXY"]
 
     # load data
-    data = utils.data.load_data(
-        dataset=args.dataset, 
-        split=args.data_split,
-        full_run=args.full_run,
-        filtered=True)
-    
-    if args.dataset == "commonsenseQA":
-        data = utils.data.flatten_CoQA_comprehension(data)
-    
-    print(f"Loaded {len(data)} instances from {args.dataset} {args.data_split}\n",
-          f"Example instance:\n{pp.pformat(data[0])}\n")
+    data = utils.data.flatten_CoQA_comprehension(
+        utils.data.load_data(
+            split=args.data_split,
+            filtered=True,
+            num_instances=10 if not args.full_run else None)
+        )
+    print(f"\tLoaded {len(data)} instances")
 
     # create prompt
     prompt_template = utils.prompting.create_template(
+        dataset="commonsenseQA",
         prompting_type=args.prompting_type,
-        dataset=args.dataset,
         output_formatting=args.output_formatting,
         for_llama2=args.llama_prompt)
 
@@ -81,33 +78,44 @@ def main(args):
                                          verbose=args.chain_verbose)
 
     # pass inputs and run chain
-    responses = {}
+    all_responses = {}
     idx_uuid_map = {}
+    inputs = []
+    batch_size = 4
+    run_id = utils.output.get_run_id()
+    main_idx = 0
+
     for idx, instance in tqdm.tqdm(enumerate(data)):
         idx_uuid_map[idx] = instance["id"]
-        inputs = {
+        inputs.append({
             'question':instance["stem"],
             'choice_A':instance["choice_A"],
             'choice_B':instance["choice_B"],
             'choice_C':instance["choice_C"],
             'choice_D':instance["choice_D"],
             'choice_E':instance["choice_E"]
-            }
-        if args.output_formatting:
-            inputs["format_instructions"] = format_instructions
-
-        response = chain.run(inputs)
+            })
         
-        if args.output_formatting:
-            parsed_response = output_parser.parse(response)
-            responses[idx] = parsed_response
-        else:
-            responses[idx] = response
+        if len(inputs) == batch_size or len(data)-idx < batch_size:
+            batch_responses = chain.batch(inputs) # call
+            inputs = [] # reset inputs
+            batch_responses_out = []
 
-    #print(f"Responses:\n{pp.pformat(responses)}\n")
+            for response in batch_responses:
+                batch_responses_out.append(
+                    {'uuid':idx_uuid_map[main_idx],
+                     'idx':main_idx,
+                     'response':response['text']}
+                )
+                main_idx += 1
+                
+                all_responses[main_idx] = response['text'] # tmp (save all responses in one dict)
+
+            if args.save:
+                utils.output.write_batch_responses(batch_responses_out, run_id)
 
     if args.save:
-        utils.output.write_responses(responses, idx_uuid_map, save_uuids=True)
+        utils.output.write_all_responses(all_responses, run_id, idx_uuid_map)
 
 
 
@@ -115,9 +123,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--dataset", 
-                        type=str, default="commonsenseQA", 
-                        help="dataset to use")
     parser.add_argument("--data_split", 
                         type=str, default="dev", 
                         help="data split to use")
@@ -150,28 +155,3 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args)
-
-
-    """
-    Batch method
-    # Does it treat each prompt as a separate call?
-
-    all_responses = {}
-    batch_size = 2
-    inputs = []
-    for idx, instance in enumerate(data):
-        inputs.append({
-            'question':instance["stem"],
-            'choice_A':instance["choice_A"],
-            'choice_B':instance["choice_B"],
-            'choice_C':instance["choice_C"],
-            'choice_D':instance["choice_D"],
-            'choice_E':instance["choice_E"]
-            })
-        if len(inputs) == batch_size or len(data)-idx < batch_size:
-            batch_responses = chain.batch(inputs)
-            inputs = []
-            for i, response in enumerate(batch_responses):
-                all_responses[idx+i] = response
-    exit()
-    """

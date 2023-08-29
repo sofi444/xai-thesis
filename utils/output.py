@@ -66,24 +66,40 @@ def build_parser(schemas_version:str="v2", parser_type:str="structured", only_js
     return output_parser, format_instructions
 
 
+def get_run_id():
+    return dt.datetime.now().strftime("%d%m%H%M")
 
-def write_responses(responses, idx_uuid_map, save_uuids:bool=False):
+
+def write_all_responses(responses, run_id, idx_uuid_map=None):
     """
-    Write responses (dict) to a JSON file.
-    Suitable for small experimental runs.
+    Write one dict containg all responses from a run to json file
+    Format: {idx: freetext response, ...}
+    save mapping of idx (from run) to uuid (from dataset)
     """
-    time_now = dt.datetime.now().strftime("%d%m%H%M")
-    filename = f"responses_{time_now}.json"
-    filepath = os.path.join(PROJECT_DIR, "responses", filename)
+    filepath = os.path.join(PROJECT_DIR, 
+                            f"responses/responses_{run_id}.json")
 
     with open(filepath, "w") as f:
        json.dump(responses, f, indent=4)
 
-    if save_uuids:
-        filepath_uuids = os.path.join(PROJECT_DIR, "processed_uuids", f"uuids_{time_now}.json")
+    if idx_uuid_map:
+        filepath_uuids = os.path.join(PROJECT_DIR, "processed_uuids", f"uuids_{run_id}.json")
         with open(filepath_uuids, "w+") as f:
             json.dump(idx_uuid_map, f, indent=4)
 
+
+def write_batch_responses(responses, run_id):
+    """
+    Write responses in one batch to a txt file
+    Format: [{uuid: uuid, id: idx, response: freetext response}, ...]
+    """
+    filepath = os.path.join(PROJECT_DIR, 
+                            f"responses/responses_batch_{run_id}.txt")
+
+    with open(filepath, "a+") as f:
+        for response in responses:
+            f.write(response)
+            f.write("\n")
 
 
 
