@@ -11,6 +11,8 @@ from langchain.llms import AzureOpenAI
 from langchain.llms import LlamaCpp
 from langchain.chains import LLMChain
 
+import utils.codellama
+
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -52,7 +54,7 @@ def load_model(model:str="openai_chat", use_azure:bool=False, env_dict:dict=None
                 verbose=True)
     
     elif model == "codellama":
-        pass
+        return codellama.load_codellama()
 
 
 def create_LLMchain(llm, prompt_template, verbose:bool=False):
