@@ -90,11 +90,11 @@ def write_all_responses(responses, run_id, idx_uuid_map=None):
 
 def write_batch_responses(responses, run_id):
     """
-    Write responses in one batch to a txt file
+    Write responses in one batch to a jsonl file
     Format: [{uuid: uuid, id: idx, response: freetext response}, ...]
     """
     filepath = os.path.join(PROJECT_DIR, 
-                            f"responses/responses_batch_{run_id}.txt")
+                            f"responses/responses_batch_{run_id}.jsonl")
 
     with open(filepath, "a+") as f:
         for response in responses:
