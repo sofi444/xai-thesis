@@ -7,63 +7,52 @@ import subprocess as sp
 
 from langchain.chat_models import ChatOpenAI
 from langchain.chat_models import AzureChatOpenAI
-
 from langchain.llms import AzureOpenAI
 from langchain.llms import LlamaCpp
-
 from langchain.chains import LLMChain
-
-#from prompting import load_templates, compose_template
-
 
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# load codellama
 
+# models: openai_chat | llama2_chat | llama2_chat_local
+def load_model(model:str="openai_chat", use_azure:bool=False, env_dict:dict=None):
 
-def load_model(model:str="OpenAI-chat-default", use_azure:bool=False, env_dict:dict=None):
-
-    if use_azure:
-        if model == "OpenAI-chat-default":
-            return azure_chat_openai_langchain(env_dict)
-
-    else:
-        if model == "OpenAI-chat-default":
-            return chat_openai_langchain()
+    if model == "openai_chat":
+        if use_azure:
+            return AzureChatOpenAI(
+                openai_api_base=env_dict["AZURE_OPENAI_ENDPOINT"],
+                openai_api_version=env_dict["OPENAI_DEPLOYMENT_VERSION"],
+                openai_api_key=env_dict["AZURE_OPENAI_KEY"],
+                model=env_dict["OPENAI_MODEL_NAME"],
+                deployment_name=env_dict["OPENAI_DEPLOYMENT_NAME"],
+                temperature=0)
+        else:
+            return ChatOpenAI(model_name= "gpt-3.5-turbo-0613", # via azure we use 0301
+                              temperature = 0)
+    
+    elif "llama2" in model:
+        chat = True if "chat" in model else False
+        local = True if "local" in model else False
         
-        elif model == "llama2_13b_chat":
-            return llamacpp_langchain(env_dict["LLAMA2_13B_CHAT_PATH"])
+        if local:
+            call_llama2_chat_local() # tmp
         
-        elif model == "llama2_13b":
-            return llamacpp_langchain(env_dict["LLAMA2_13B_PATH"])
-
-
-def azure_chat_openai_langchain(env_dict):
-    return AzureChatOpenAI(
-        openai_api_base=env_dict["AZURE_OPENAI_ENDPOINT"],
-        openai_api_version=env_dict["OPENAI_DEPLOYMENT_VERSION"],
-        openai_api_key=env_dict["AZURE_OPENAI_KEY"],
-        model=env_dict["OPENAI_MODEL_NAME"],
-        deployment_name=env_dict["OPENAI_DEPLOYMENT_NAME"],
-        temperature=0)
-
-
-def chat_openai_langchain():
-    return ChatOpenAI(model_name= "gpt-3.5-turbo-0613", 
-                      temperature = 0)
-
-
-def llamacpp_langchain(model_path):
-    return LlamaCpp(
-        model_path=model_path,
-        n_gpu_layers=1,
-        n_batch=512,
-        n_threads=8,
-        f16_kv=True,  # MUST be True, otherwise it gives problems after a couple of calls (with metal install)
-        temperature=0.0,
-        max_tokens=-1,
-        repeat_penalty=1.1,
-        verbose=True)
+        else:
+            return LlamaCpp(
+                model_path=env_dict[f"LLAMA2_13B_{'CHAT_' if chat else ''}PATH"],
+                n_gpu_layers=1,
+                n_batch=512,
+                n_threads=8,
+                f16_kv=True, # MUST be True, otherwise problems after a couple of calls (metal install)
+                temperature=0.0,
+                max_tokens=-1,
+                repeat_penalty=1.1,
+                verbose=True)
+    
+    elif model == "codellama":
+        pass
 
 
 def create_LLMchain(llm, prompt_template, verbose:bool=False):
@@ -134,9 +123,3 @@ def remove_substring(string, substring):
 def get_model_info(model_ob):
     return {'model_name': model_ob.model_name,
             'temperature': model_ob.temperature}
-
-
-
-
-if __name__ == "__main__":
-    call_llama2_chat_local()
