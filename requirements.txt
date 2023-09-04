@@ -11,6 +11,7 @@ async-timeout==4.0.2
 attrs==23.1.0
 backcall==0.2.0
 beautifulsoup4==4.12.2
+bitsandbytes==0.41.1
 bleach==6.0.0
 blis==0.7.10
 catalogue==2.0.9
@@ -174,7 +175,7 @@ torch==2.0.1
 tornado==6.3.2
 tqdm==4.65.0
 traitlets==5.9.0
-transformers==4.30.2
+transformers @ git+https://github.com/huggingface/transformers@4c21da5e347bfc53ee4ec5b71a23721fefe6822c
 triton==2.0.0
 typer==0.9.0
 typing-inspect==0.9.0
