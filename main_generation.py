@@ -103,8 +103,8 @@ def main(args):
 
             for response in batch_responses:
                 batch_responses_out.append(
-                    {'uuid':idx_uuid_map[main_idx],
-                     'idx':main_idx,
+                    {'idx':main_idx,
+                     'uuid':idx_uuid_map[main_idx],
                      'response':response['text']}
                 )
                 main_idx += 1

@@ -16,7 +16,6 @@ import utils.codellama
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# load codellama
 
 # models: openai_chat | llama2_chat | llama2_chat_local
 def load_model(model:str="openai_chat", use_azure:bool=False, env_dict:dict=None):
@@ -31,7 +30,7 @@ def load_model(model:str="openai_chat", use_azure:bool=False, env_dict:dict=None
                 deployment_name=env_dict["OPENAI_DEPLOYMENT_NAME"],
                 temperature=0)
         else:
-            return ChatOpenAI(model_name= "gpt-3.5-turbo-0613", # via azure we use 0301
+            return ChatOpenAI(model_name= "gpt-3.5-turbo-0301", # via azure we use 0301
                               temperature = 0)
     
     elif "llama2" in model:
@@ -54,7 +53,7 @@ def load_model(model:str="openai_chat", use_azure:bool=False, env_dict:dict=None
                 verbose=True)
     
     elif model == "codellama":
-        return codellama.load_codellama()
+        return utils.codellama.load_codellama()
 
 
 def create_LLMchain(llm, prompt_template, verbose:bool=False):

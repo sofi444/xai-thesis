@@ -98,8 +98,7 @@ def write_batch_responses(responses, run_id):
 
     with open(filepath, "a+") as f:
         for response in responses:
-            f.write(response)
-            f.write("\n")
+            f.write(json.dumps(response) + "\n")
 
 
 
