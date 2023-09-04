@@ -14,6 +14,9 @@ from scipy.spatial.distance import cosine
 
 from itertools import combinations
 from typing import List, Dict
+from tqdm import tqdm
+
+import utils.data
 
 
 
@@ -61,49 +64,54 @@ def get_lm_score(question, model, tokenizer):
 
 
 
-def filter_data(file_path:str, sim_threshold:float, gramm_threshold:float):
+def filter_data(data_split_to_filter, sim_threshold:float, gramm_threshold:float):
+    ''' Filters commonsenseQA data based on three conditions '''
+
+    data = utils.data.load_data(split=data_split_to_filter,
+                                dataset="commonsenseQA",
+                                filtered=False,
+                                num_instances=None) # None for all instances else int
+
+    print(f"Loaded {len(data)} instances from original {data_split_to_filter} data.")
 
     filtered_data = []
-
-    with open(file_path, 'r') as f:
-        for idx, line in enumerate(f):
-            data = json.loads(line)
-            choices = data['question']['choices']
-            question = data['question']['stem']
-
-            # first condition
-            if check_choice_uniqueness(choices):
-                # second condition
-                if check_semantic_similarity(choices, sim_threshold, nlp):
+    for instance in tqdm(data):
+        question = instance['question']['stem']
+        choices = instance['question']['choices']
+    
+        # first condition
+        if check_choice_uniqueness(choices):
+            # second condition
+            if check_semantic_similarity(choices, sim_threshold, nlp):
+                
+                #third condition
+                #lm_score = get_lm_score(question, model, tokenizer)
+                #if lm_score <= gramm_threshold:
                     
-                    #third condition
-                    #lm_score = get_lm_score(question, model, tokenizer)
-                    #if lm_score <= gramm_threshold:
-                    #    filtered_data.append(data)
+                #    filtered_data.append(instance)
+                #else:
+                #    print(f"!cond 3 (grammaticality) - {question} - {lm_score}\n")
 
-                    #else:
-                    #    print(f"{idx+1} !cond 3 (grammaticality) - {question} - {lm_score}\n")
-
-                    filtered_data.append(data)
-                else:
-                    print(f"{idx+1} !cond 2 (semantic similarity) - {question} - {choices}\n")
+                filtered_data.append(instance)
             else:
-                print(f"{idx+1} !cond 1 (choice uniqueness) - {question}")
-            
-            #if idx == 200: #tmp
-            #    break
+                print(f"!cond 2 (semantic similarity) - {question} - {choices}\n")
+        else:
+            print(f"!cond 1 (choice uniqueness) - {question} - {choices}\n")
 
     return filtered_data
 
 
-
-def save_filtered_data(filtered_data, file_path):
-    ''' Saves filtered data to file_path '''
-
-    with open(file_path, 'w') as f:
-        for data in filtered_data:
-            json.dump(data, f)
+def save_filtered_data(filtered_data, data_split_to_filter):
+    ''' Saves filtered data to jsonl file 
+    out filename: <split>_filtered.jsonl
+    '''
+    out_path = os.path.join(DATASET_DIR, f"{data_split_to_filter}_filtered.jsonl")
+    with open(out_path, 'w') as f:
+        for instance in filtered_data:
+            json.dump(instance, f)
             f.write('\n')
+    
+    print("Filtered data saved to file.")
 
 
 
@@ -112,18 +120,14 @@ if __name__ == "__main__":
     PROJECT_DIR = os.path.dirname(os.path.abspath(__file__)) # xai_sofia_casadei_master_thesis
     DATA_DIR = os.path.join(PROJECT_DIR, 'data/') # xai_sofia_casadei_master_thesis/data/
     DATASET_DIR = os.path.join(DATA_DIR, 'commonsenseQA')
-    
-    file_path = os.path.join(DATASET_DIR, 'dev_rand_split.jsonl')
 
     sim_threshold = 0.88
-    gramm_threshold = 60.00
+    gramm_threshold = 80.00
 
-    filtered_data = filter_data(file_path, 
-                                sim_threshold, 
-                                gramm_threshold)
+    filtered_data = filter_data(data_split_to_filter="train", 
+                                sim_threshold=sim_threshold,
+                                gramm_threshold=gramm_threshold)
     
     print(f"Instances in filtered data: {len(filtered_data)}")
-    print(f"Instances in original data: {len(open(file_path, 'r').readlines())}")
 
-    save_filtered_data(filtered_data, os.path.join(DATASET_DIR, 'dev_rand_split_filtered.jsonl'))
-    print("Filtered data saved to file.")
+    save_filtered_data(data_split_to_filter="train", filtered_data=filtered_data)
