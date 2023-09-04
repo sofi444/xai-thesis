@@ -22,6 +22,7 @@ RESPONSES_DIR = os.path.join(PROJECT_DIR, 'responses')
 schemas_path = os.path.join(PROJECT_DIR, 'schemas/output-parsing_schemas.json')
 template_path = os.path.join(PROJECT_DIR, 'prompt_templates/output-parsing_templates.json')
 responses_path = os.path.join(RESPONSES_DIR, 'freetext_turbo0301_700dev_14081857.json')
+examples_path = os.path.join(PROJECT_DIR, 'output-parsing_examples.jsonl')
 
 
 
@@ -46,15 +47,24 @@ def load_codellama():
 
 
 def tokenize_instructions_and_examples(few_shot:bool, tokenizer, instructions):
+
     if few_shot:
-        examples = ['ex']
-        examples_tokenized = tokenizer(examples, return_tensors="pt").to(device)
-    else:
-        examples_tokenized = None
+        N_examples = 6
+        raw_examples = []
+        with open(examples_path, "r") as f:
+            for line in f:
+                raw_examples.append(json.loads(line))
+
+        examples = "\n\nExamples:\n"
+        for example in raw_examples[:N_examples]:
+            examples += example['full_text'].replace('\n', ' ')
+            examples += f"\n\n```json\n{example['output']}\n```\n\n"
+
+        instructions += examples
 
     instructions_tokenized = tokenizer(instructions, return_tensors="pt").to(device)
 
-    return instructions_tokenized, examples_tokenized
+    return instructions_tokenized
 
 
 
@@ -67,14 +77,7 @@ def tokenize_inputs(inputs, tokenizer):
     return tokenized_inputs
 
 
-def create_batch_inputs(instructions_tok, examples_tok, inputs_tok):
-
-    if examples_tok: # append examples to instructions
-        instructions_tok = torch.cat(
-            [instructions_tok['input_ids'],
-            examples_tok['input_ids']],
-            dim=1
-        )
+def create_batch_inputs(instructions_tok, inputs_tok):
     
     combined_input_ids = [torch.cat(
         [instructions_tok['input_ids'],

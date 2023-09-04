@@ -118,8 +118,8 @@ def main(args):
         formatted_responses = {}
         main_idx = 0
 
-        instructions, examples = utils.codellama.tokenize_instructions_and_examples(
-            few_shot=False,
+        instructions = utils.codellama.tokenize_instructions_and_examples(
+            few_shot=True,
             tokenizer=tokenizer,
             instructions=format_instructions
         )
@@ -137,7 +137,6 @@ def main(args):
                 )
                 batch_inputs = utils.codellama.create_batch_inputs(
                     instructions_tok=instructions,
-                    examples_tok=examples,
                     inputs_tok=inputs
                 )
                 batch_outputs = utils.codellama.run_batch(
@@ -164,10 +163,10 @@ def main(args):
                         formatted['idx'] = response["idx"]
                         formatted['uuid'] = response["uuid"]
                         # add full text
-                        formatted["full_text"] = inputs[idx_batch]
+                        formatted["full_text"] = response["response"]
                     
                     elif isinstance(response, str): # single response json
-                        formatted["full_text"] = inputs[idx_batch]
+                        formatted["full_text"] = response
                         formatted["idx"] = main_idx
 
                     batch_formatted.append(formatted)
