@@ -24,22 +24,16 @@ RESPONSES_DIR = os.path.join(PROJECT_DIR, 'responses')
 
 
 def load_freetext_responses(filename:str, full_run:bool=False):
+    ''' 
+    Load responses from jsonl file
+    Format: {id: idx, uuid: uuid, response: freetext response}, {...}
+    '''
     filepath = os.path.join(RESPONSES_DIR, filename)
     N = 7
-
-    if filename.endswith(".json"):
-        # Format: {idx: freetext response, ...}
-        with open(filepath, "r") as f:
-            responses = json.load(f)
-            if not full_run:
-                responses = {idx:res for idx, res in responses.items() if int(idx) < N}
-    
-    elif filename.endswith(".jsonl"):
-        # Format: [{uuid: uuid, id: idx, response: freetext response}, ...]
-        with open(filepath, "r") as f:
-            responses = [json.loads(line) for line in f.readlines()]
-            if not full_run:
-                responses = responses[:N]
+    with open(filepath, "r") as f:
+        responses = [json.loads(line) for line in f.readlines()]
+        if not full_run:
+            responses = responses[:N]
     
     return responses
 
@@ -53,10 +47,18 @@ def config_env():
 
 
 
-def write_formatted_responses(formatted_responses:dict, out_filename:str):
+def write_formatted_responses(formatted_responses, out_filename):
+    ''' Write formatted responses to jsonl file
+    formatted responses: list of dicts
+    out format: json lines {id: idx, uuid: uuid, response: freetext response, format: {answer_letter: X, answer_text: text}}, {...}
+    '''
     out_filepath = os.path.join(PROJECT_DIR, "responses", out_filename)
-    with open(out_filepath, "w") as f:
-        json.dump(formatted_responses, f, indent=4)
+    if not out_filepath.endswith(".jsonl"):
+        out_filepath += ".jsonl"
+        
+    with open(out_filepath, "a+") as f:
+        for response in formatted_responses:
+            f.write(json.dumps(response) + "\n")
 
 
 
@@ -73,8 +75,7 @@ def load_template(template_version:str):
 
 def catch_errors(formatted_response:dict):
     ''' Add ERROR key to formatted_response if errors are found '''
-
-    # multiple answers
+    
     if len(formatted_response["answer_letter"]) > 1:
         formatted_response["ERROR"] = "multiple answers"
     if formatted_response["answer_letter"] == "":
@@ -87,23 +88,6 @@ def catch_errors(formatted_response:dict):
 def main(args):
     responses = load_freetext_responses(args.in_filename, args.full_run)
 
-    if args.model == "openai_chat":
-        env_dict = config_env()
-        if args.use_azure:
-            openai.api_type = "azure"
-            openai.api_base = env_dict["AZURE_OPENAI_ENDPOINT"]
-            openai.api_version = env_dict["OPENAI_DEPLOYMENT_VERSION"]
-            openai.api_key = env_dict["AZURE_OPENAI_KEY"]
-            openai.proxy = env_dict["HTTP_PROXY"]
-
-        model = utils.models.load_model(env_dict=env_dict,
-                                        use_azure=args.use_azure,
-                                        model=args.model)
-    
-    elif args.model == "codellama":
-        #model, tokenizer = utils.models.load_model(model=args.model)
-        model, tokenizer = utils.codellama.load_codellama()
-
     template = PromptTemplate.from_template(load_template(template_version="v3"))
 
     output_parser, format_instructions = utils.output.build_parser(
@@ -111,11 +95,13 @@ def main(args):
         parser_type="structured",
         only_json=False
     )
-    
+
     if args.model == "codellama":
+        #model, tokenizer = utils.models.load_model(model=args.model)
+        model, tokenizer = utils.codellama.load_codellama()
+
         inputs = []
         batch_size = 3
-        formatted_responses = {}
         main_idx = 0
 
         instructions = utils.codellama.tokenize_instructions_and_examples(
@@ -125,10 +111,7 @@ def main(args):
         )
 
         for response in responses:
-            if isinstance(response, dict): # batch responses jsonl
-                inputs.append(response["response"])
-            elif isinstance(response, str): # single response json
-                inputs.append(response)
+            inputs.append(response["text"]) # response is dict (line from jsonl)
             
             if len(inputs) == batch_size or len(responses)-main_idx < batch_size:
                 inputs = utils.codellama.tokenize_inputs(
@@ -150,7 +133,7 @@ def main(args):
                 )
                 
                 batch_formatted = []
-                for idx_batch, output in enumerate(batch_outputs_decoded):
+                for output in batch_outputs_decoded:
                     try:
                         formatted = output_parser.parse(output) # dict
                         formatted = catch_errors(output) # dict
@@ -158,18 +141,11 @@ def main(args):
                         formatted = {"ERROR": "unable to parse",
                                      "parser_output": output}
                     
-                    if isinstance(response, dict): # batch responses jsonl
-                        # add keys from original response
-                        formatted['idx'] = response["idx"]
-                        formatted['uuid'] = response["uuid"]
-                        # add full text
-                        formatted["full_text"] = response["response"]
-                    
-                    elif isinstance(response, str): # single response json
-                        formatted["full_text"] = response
-                        formatted["idx"] = main_idx
+                    # combine response and formatted dicts
+                    output_dict = {**response,
+                                   'format': formatted}
 
-                    batch_formatted.append(formatted)
+                    batch_formatted.append(output_dict)
                     main_idx += 1
 
                 inputs = [] # reset
@@ -177,34 +153,57 @@ def main(args):
                 print(batch_formatted)
                 print(main_idx)
 
+                write_formatted_responses(formatted_responses=batch_formatted,
+                                          out_filename=args.out_filename)
 
 
-    elif args.model == "openai":
+    elif args.model == "openai_chat":
+        env_dict = config_env()
+        if args.use_azure:
+            openai.api_type = "azure"
+            openai.api_base = env_dict["AZURE_OPENAI_ENDPOINT"]
+            openai.api_version = env_dict["OPENAI_DEPLOYMENT_VERSION"]
+            openai.api_key = env_dict["AZURE_OPENAI_KEY"]
+            openai.proxy = env_dict["HTTP_PROXY"]
 
-        # structure of free text responses
-        formatted_responses = {}
-        for idx, response in tqdm.tqdm((responses.items())):
-            prompt = template.format(freetext_response=response, 
-                                    format_instructions=format_instructions)
-            formatted_response = model.predict(prompt) # str
+        model = utils.models.load_model(env_dict=env_dict,
+                                        use_azure=args.use_azure,
+                                        model=args.model)
+        
+        inputs = []
+        batch_size = 4
+        main_idx = 0
 
-            try:
-                formatted_response = output_parser.parse(formatted_response) # dict
-                formatted_response = catch_errors(formatted_response)
-            except:
-                formatted_responses[idx] = {"ERROR": "unable to parse",
-                                            "output_string": formatted_response,
-                                            "full_text": response}
-                continue
+        for response in responses:
+            # response is dict (line from jsonl)
+            prompt = template.format(freetext_response=response["text"],
+                                     format_instructions=format_instructions)
+            inputs.append(prompt)
 
-            # add full_text field to with original free text response
-            if "full_text" not in formatted_response.keys():
-                formatted_response["full_text"] = response
+            if len(inputs) == batch_size or len(responses)-main_idx < batch_size:
 
-            formatted_responses[idx] = formatted_response
+                batch_outputs = model.batch(inputs) # call
 
-        write_formatted_responses(formatted_responses=formatted_responses,
-                                out_filename=args.out_filename)
+                batch_formatted = []
+                for output in batch_outputs:
+                    try:
+                        formatted = output_parser.parse(output) # dict
+                        formatted = catch_errors(output) # dict
+                    except:
+                        formatted = {"ERROR": "unable to parse",
+                                     "parser_output": output}
+                    
+                    # combine response and formatted dicts
+                    output_dict = {**response,
+                                   'format': formatted}
+                    
+                    batch_formatted.append(output_dict)
+                    main_idx += 1
+
+                inputs = [] # reset
+
+                write_formatted_responses(formatted_responses=batch_formatted,
+                                          out_filename=args.out_filename)
 
 
 

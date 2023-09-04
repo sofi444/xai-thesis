@@ -78,15 +78,14 @@ def main(args):
                                          verbose=args.chain_verbose)
 
     # pass inputs and run chain
-    all_responses = {}
-    idx_uuid_map = {}
     inputs = []
     batch_size = 4
     run_id = utils.output.get_run_id()
     main_idx = 0
 
     for idx, instance in tqdm.tqdm(enumerate(data)):
-        idx_uuid_map[idx] = instance["id"]
+        #idx_uuid_map[idx] = instance["id"]
+        uuid = instance["id"]
         inputs.append({
             'question':instance["stem"],
             'choice_A':instance["choice_A"],
@@ -99,23 +98,18 @@ def main(args):
         if len(inputs) == batch_size or len(data)-idx < batch_size:
             batch_responses = chain.batch(inputs) # call
             inputs = [] # reset inputs
+            
             batch_responses_out = []
-
             for response in batch_responses:
                 batch_responses_out.append(
                     {'idx':main_idx,
-                     'uuid':idx_uuid_map[main_idx],
-                     'response':response['text']}
+                     'uuid':uuid,
+                     'text':response['text']}
                 )
                 main_idx += 1
-                
-                all_responses[main_idx] = response['text'] # save all responses in one dict
 
             if args.save:
                 utils.output.write_batch_responses(batch_responses_out, run_id)
-
-    if args.save:
-        utils.output.write_all_responses(all_responses, run_id, idx_uuid_map)
 
 
 

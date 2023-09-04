@@ -70,31 +70,13 @@ def get_run_id():
     return dt.datetime.now().strftime("%d%m%H%M")
 
 
-def write_all_responses(responses, run_id, idx_uuid_map=None):
-    """
-    Write one dict containg all responses from a run to json file
-    Format: {idx: freetext response, ...}
-    save mapping of idx (from run) to uuid (from dataset)
-    """
-    filepath = os.path.join(PROJECT_DIR, 
-                            f"responses/responses_{run_id}.json")
-
-    with open(filepath, "w") as f:
-       json.dump(responses, f, indent=4)
-
-    if idx_uuid_map:
-        filepath_uuids = os.path.join(PROJECT_DIR, "processed_uuids", f"uuids_{run_id}.json")
-        with open(filepath_uuids, "w+") as f:
-            json.dump(idx_uuid_map, f, indent=4)
-
-
 def write_batch_responses(responses, run_id):
     """
     Write responses in one batch to a jsonl file
-    Format: [{uuid: uuid, id: idx, response: freetext response}, ...]
+    Format: {idx: idx, uuid: uuid, text: freetext response}, {...}
     """
     filepath = os.path.join(PROJECT_DIR, 
-                            f"responses/responses_batch_{run_id}.jsonl")
+                            f"responses/responses_{run_id}.jsonl")
 
     with open(filepath, "a+") as f:
         for response in responses:
