@@ -37,7 +37,7 @@ def get_llama_prompt(sys_prompt:str, user_message:str, i_first:bool=False):
 
 
 # helper
-def compose_template(template_name:str, templates:dict, for_llama2:bool, i_first:bool=False):
+def compose_template(template_name:str, templates:dict, for_llama2:bool, i_first:bool):
     """
     Returns a template string composed of the sys prompt (the task) 
     and the instance (actual instance from the dataset).
@@ -46,7 +46,7 @@ def compose_template(template_name:str, templates:dict, for_llama2:bool, i_first
     i_first: if True, the instance comes first, then the sys prompt
     """
     sys = templates["sys"][template_name]
-    instance = templates["instance"]["par_newl"]
+    instance = templates["instance"]["dot_newl"]
 
     if for_llama2:
         return get_llama_prompt(sys, instance, i_first)
@@ -55,13 +55,14 @@ def compose_template(template_name:str, templates:dict, for_llama2:bool, i_first
         
 
 
-def create_template(prompting_type:str, dataset:str, output_formatting:bool, for_llama2:bool):
+def create_template(prompting_type:str, dataset:str, output_formatting:bool, 
+                    for_llama2:bool, i_first:bool=True):
 
     if dataset == "commonsenseQA":
         templates = load_templates("CoQA_templates.json")
         template_name = f"{prompting_type}_format" if output_formatting else prompting_type
         
-        template = compose_template(template_name, templates, for_llama2) # str
+        template = compose_template(template_name, templates, for_llama2, i_first) # str
 
         # chat - pass everything as human message
         #langchain_template = ChatPromptTemplate.from_template(template)

@@ -1,18 +1,20 @@
 {
     "sys": {
-        "base_TSBS" : "Answer: Let's think step by step...",
-        "base_TSBS_format" : "Answer: Let's think step by step...\n{format_instructions}",
+        "base_TSBS" : "Answer: Let's think step by step.",
+        "base_TSBS_format" : "Answer: Let's think step by step.\n{format_instructions}",
         "TSBS_1" : "Answer: Let's work this out in a step by step way to be sure we have the right answer.",
         "TSBS_1_format" : "Answer: Let's work this out in a step by step way to be sure we have the right answer.\n{format_instructions}",
         "TSBS_bad": "Answer the question. Choose one of the five possible choices. Only one is correct. Think step by step.",
         "TSBS_bad_format" : "Answer the question. Choose one of the five possible choices. Only one is correct. Think step by step.\n{format_instructions}"
     },
     "instance": {
-        "eq_semic": "Question: {question}\n\nChoices:\nA={choice_A}; B={choice_B}; C={choice_C}; D={choice_D}; E={choice_E}",
-        "eq_newl": "Question: {question}\n\nChoices:\nA={choice_A}\nB={choice_B}\nC={choice_C}\nD={choice_D}\nE={choice_E}",
-        "par_semic": "Question: {question}\n\nChoices:\nA) {choice_A}; B) {choice_B}; C) {choice_C}; D) {choice_D}; E) {choice_E}",
-        "par_newl": "Question: {question}\n\nChoices:\nA) {choice_A}\nB) {choice_B}\nC) {choice_C}\nD) {choice_D}\nE) {choice_E}",
-        "hyp_semic": "Question: {question}\n\nChoices:\n-A: {choice_A}; -B: {choice_B}; -C: {choice_C}; -D: {choice_D}; -E: {choice_E}",
-        "hyp_newl": "Question: {question}\n\nChoices:\n-A: {choice_A}\n-B: {choice_B}\n-C: {choice_C}\n-D: {choice_D}\n-E: {choice_E}"
+        "eq_semic": "Question: {question}\nA={choice_A}; B={choice_B}; C={choice_C}; D={choice_D}; E={choice_E}",
+        "eq_newl": "Question: {question}\nA={choice_A}\nB={choice_B}\nC={choice_C}\nD={choice_D}\nE={choice_E}",
+        "par_semic": "Question: {question}\nA) {choice_A}; B) {choice_B}; C) {choice_C}; D) {choice_D}; E) {choice_E}",
+        "par_newl": "Question: {question}\nA) {choice_A}\nB) {choice_B}\nC) {choice_C}\nD) {choice_D}\nE) {choice_E}",
+        "hyp_semic": "Question: {question}\n-A: {choice_A}; -B: {choice_B}; -C: {choice_C}; -D: {choice_D}; -E: {choice_E}",
+        "hyp_newl": "Question: {question}\n-A: {choice_A}\n-B: {choice_B}\n-C: {choice_C}\n-D: {choice_D}\n-E: {choice_E}",
+        "dot_semic": "Question: {question}\nA. {choice_A}; B. {choice_B}; C. {choice_C}; D. {choice_D}; E.{choice_E}",
+        "dot_newl": "Question: {question}\nA. {choice_A}\nB. {choice_B}\nC. {choice_C}\nD. {choice_D}\nE. {choice_E}"
     }
 }
