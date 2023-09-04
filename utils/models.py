@@ -28,10 +28,10 @@ def load_model(model:str="openai_chat", use_azure:bool=False, env_dict:dict=None
                 openai_api_key=env_dict["AZURE_OPENAI_KEY"],
                 model=env_dict["OPENAI_MODEL_NAME"],
                 deployment_name=env_dict["OPENAI_DEPLOYMENT_NAME"],
-                temperature=0)
+                temperature=0.0)
         else:
             return ChatOpenAI(model_name= "gpt-3.5-turbo-0301", # via azure we use 0301
-                              temperature = 0)
+                              temperature=0.0)
     
     elif "llama2" in model:
         chat = True if "chat" in model else False
