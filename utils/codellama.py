@@ -6,14 +6,15 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from transformers.tokenization_utils_base import BatchEncoding
 
-from langchain import PromptTemplate
 
 
+'''
+device('cuda') uses all gpus, set CUDA_VISIBLE_DEVICES before running script
+    CUDA_VISIBLE_DEVICES=0,1 python3 utils/codellama.py
 
-gpus_to_use = "0"
-os.environ["CUDA_VISIBLE_DEVICES"] = gpus_to_use
-device = torch.device(f"cuda:{gpus_to_use}" if torch.cuda.is_available() else "cpu")
-# ! does not work with multiple gpus: invalid device string
+setting gpus as script ('cuda:0,1') give invald string error
+'''
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_DIR = os.path.join(PROJECT_DIR, '.cache')
@@ -33,7 +34,10 @@ def load_codellama():
     bnb_4bit_compute_dtype=torch.float16
     )
 
-    tokenizer = AutoTokenizer.from_pretrained(model_id, cache_dir=CACHE_DIR)
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_id,
+        cache_dir=CACHE_DIR
+    )
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         quantization_config=quantization_config,
@@ -68,12 +72,20 @@ def tokenize_instructions_and_examples(few_shot:bool, tokenizer, instructions):
 
 
 
-def tokenize_inputs(inputs, tokenizer):
+def tokenize_inputs(inputs, tokenizer, add_s_token:bool=False):
     tokenized_inputs = []
-    for input in inputs:
+    if len(inputs) > 1:
+        for input in inputs:
+            tokenized_inputs.append(
+                tokenizer(input,
+                          add_special_tokens=add_s_token,
+                          return_tensors="pt").to(device)
+        )
+    else:
         tokenized_inputs.append(
-            tokenizer(input, return_tensors="pt").to(device)
-    )
+            tokenizer(inputs, return_tensors="pt").to(device)
+        )
+
     return tokenized_inputs
 
 
@@ -136,4 +148,66 @@ def decode_batch(batch_outputs, batch_inputs, tokenizer):
 
 
 if __name__ == "__main__":
-    load_codellama()
+
+    '''
+    set CUDA_VISIBLE_DEVICES before running script
+        CUDA_VISIBLE_DEVICES=0,1 python3 utils/codellama.py
+    '''
+
+    from langchain import PromptTemplate
+    import output
+
+    # set N
+    def load_freetext_responses(filename:str, full_run:bool=False):
+        ''' 
+        Load responses from jsonl file
+        Format: {id: idx, uuid: uuid, response: freetext response}, {...}
+        '''
+        filepath = os.path.join(RESPONSES_DIR, filename)
+        N = 2
+        with open(filepath, "r") as f:
+            responses = [json.loads(line) for line in f.readlines()]
+            if not full_run:
+                responses = responses[:N]
+        
+        return responses
+    
+    def load_template(template_version:str):
+        template_filepath = os.path.join(PROJECT_DIR, 
+                                        "prompt_templates/output-parsing_templates.json")
+        with open(template_filepath, "r") as f:
+            templates = json.load(f)
+            template = templates[template_version]
+        
+        return template
+
+    responses = load_freetext_responses("freetext_turbo_700dev_14081857.jsonl")
+
+    template = PromptTemplate.from_template(load_template("v3"))
+    
+    output_parser, format_instructions = output.build_parser(
+        schemas_version="v3",
+        parser_type="structured",
+        only_json=False
+    )
+
+    model, tokenizer = load_codellama()
+
+    # full instructions are
+        # output parsing instructions (task description)
+        # format_instructions (schemas, formatted by langchain)
+    # tmp: get task description only from template
+    instructions = template.template.split("\n\n")[0] + "\n\n" + format_instructions
+
+    instructions = tokenize_instructions_and_examples(
+            few_shot=False,
+            tokenizer=tokenizer,
+            instructions=format_instructions
+        )
+    # <s> appended at the start, nothing at the end
+    
+    #inputs = [response["text"] for response in responses]
+    inputs = responses[0]["text"]
+    inputs_tok = tokenize_inputs(inputs, tokenizer)
+    
+    
