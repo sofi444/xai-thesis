@@ -8,7 +8,7 @@ import json
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-responses_to_convert = 'responses/format_turbo_14081857_turbo.json'
+responses_to_convert = 'responses/14081857_parsed_turbo_turbo.jsonl'
 
 
 old_responses_path = os.path.join(PROJECT_DIR, responses_to_convert)
@@ -79,3 +79,16 @@ if responses_to_convert == 'responses/format_turbo_14081857_turbo.json':
                 new_response['format']['ERROR'] = response_dict['ERROR']
             
             f.write(json.dumps(new_response) + "\n")
+
+
+if responses_to_convert == 'responses/14081857_parsed_turbo_turbo.jsonl':
+    # current format: {idx:0, uuid:hiwhrih, text:…, format: {answer_letter: A, answer_text: bank}}
+    # only change format key to 'parsed'
+    with open(old_responses_path, "r") as f:
+        responses = [json.loads(line) for line in f.readlines()]
+    
+    new_responses_path = old_responses_path+'_new.jsonl'
+    with open(new_responses_path, "a+") as f:
+        for response in responses:
+            response['parsed'] = response.pop('format')
+            f.write(json.dumps(response) + "\n")
