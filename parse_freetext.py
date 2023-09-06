@@ -9,6 +9,7 @@ import utils.output
 import utils.models
 import utils.codellama
 import utils.prompting
+import utils.data
 
 from langchain import PromptTemplate
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
@@ -32,6 +33,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 RESPONSES_DIR = os.path.join(PROJECT_DIR, 'responses')
+DATA_DIR = os.path.join(PROJECT_DIR, 'data')
 
 
 
@@ -105,6 +107,26 @@ def catch_errors(parsed_response:dict):
 
 
 
+def get_uuid_choices_map(data_file, responses):
+
+    data_filepath = os.path.join(
+        DATA_DIR, data_file
+    ) if "/" not in data_file else os.path.join(DATA_DIR, data_file)
+
+    with open(data_filepath, "r") as f:
+        for line in f.readlines():
+            data = [json.loads(line) for line in f]
+    
+    uuid_choices_map = {}
+    for instance in data:
+        choices = instance["question"]["choices"]
+        choices = ", ".join([f"{choice['label']}. {choice['text']}" for choice in choices])
+        uuid_choices_map[instance["uuid"]] = choices
+    
+    return uuid_choices_map
+
+
+
 def main(args):
     responses = load_freetext_responses(args.in_file, args.full_run)
 
@@ -115,6 +137,9 @@ def main(args):
         parser_type="structured",
         only_json=False
     )
+
+    if args.with_choices:
+        uuid_choices_map = get_uuid_choices_map(data_file=args.og_data, responses=responses)
 
     if args.model == "codellama":
         #model, tokenizer = utils.models.load_model(model=args.model)
@@ -130,6 +155,10 @@ def main(args):
         for response in tqdm(responses):
             # sys prompt stays the same for all
             user_message = response["text"]
+
+            if args.with_choices:
+                choices = uuid_choices_map[response["uuid"]]
+                user_message = f"{choices}\n\n{user_message}"
 
             llama_prompt = utils.prompting.get_llama_prompt(
                 sys_prompt=sys_prompt,
@@ -251,6 +280,13 @@ if __name__ == "__main__":
     parser.add_argument("--full_run",
                         action='store_true',
                         help="include to run on all instances from the datafile, omit to run on N instance (set N)")
+    parser.add_argument("--with_choices",
+                        action='store_true',
+                        help="include to add choices to the prompt, omit otherwise.")
+    parser.add_argument("--og_data",
+                        type=str,
+                        help="original data file to get choices from")
+    
 
     args = parser.parse_args()
     main(args)
