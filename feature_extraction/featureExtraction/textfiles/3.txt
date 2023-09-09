@@ -1,7 +1,1 @@
-- A fast food restaurant is a common place to find hamburgers, so A is a possible answer.
-- Pizza is not related to hamburgers, so B is not a valid answer.
-- C is technically correct, as hamburgers are made from ground beef, but it is not a common or appropriate answer option.
-- D is not a location, but rather where a person eats a hamburger, so it is not a valid answer option.
-- E is not a valid answer, as it is not a location where hamburgers are typically found.
-
-Therefore, the most likely answer is A) fast food restaurant.
+Google Maps and other highway and street GPS services provide directions and maps for navigating roads and streets. Therefore, they have replaced the need for physical maps, such as atlases, that were previously used for the same purpose. So, the correct answer is D. atlas.
