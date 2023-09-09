@@ -29,7 +29,7 @@ def load_predictions(in_file):
 
 
 
-def write_predictions_eval(predictions_eval, in_file):
+def write_predictions_eval(predictions_eval, in_file, mode="a+"):
     ''' Write evaluated predictions to jsonl file
     
     predictions_eval: list of dicts
@@ -41,9 +41,7 @@ def write_predictions_eval(predictions_eval, in_file):
         PROJECT_DIR, "responses", out_file
     ) if "/" not in out_file else os.path.join(PROJECT_DIR, out_file)
 
-    out_filepath = out_filepath+"tmp.jsonl"
-
-    with open(out_filepath, "a+") as f:
+    with open(out_filepath, mode) as f:
         for pred_with_eval in predictions_eval:
             f.write(json.dumps(pred_with_eval) + "\n")
 
@@ -63,26 +61,30 @@ def evaluate_CoQA(args):
         uuid_label_map[instance['id']] = instance['answerKey']
         
     for idx, prediction in enumerate(predictions):
-        if idx == 0:
-            print(prediction)
-    
-        instance_uuid = prediction['uuid']
-        pred = prediction['parsed']['answer_letter']
-        gold = uuid_label_map[instance_uuid]
 
-        eval_dict = {'gold': gold, 'outcome': None}
-        if pred == gold:
-            eval_dict['outcome'] = True
-        else:
-            eval_dict['outcome'] = False
+        try:
+            instance_uuid = prediction['uuid']
+            pred = prediction['parsed']['answer_letter']
+            gold = uuid_label_map[instance_uuid]
+
+            eval_dict = {'gold': gold, 'outcome': None}
+            if pred == gold:
+                eval_dict['outcome'] = True
+            else:
+                eval_dict['outcome'] = False
+            
+            prediction['eval'] = eval_dict
+            predictions_eval.append(prediction)
+
+            # write to file every <dump_size> instances
+            if idx == dump_size or len(predictions)-idx < dump_size:
+                mode = "w+" if idx == dump_size else "a+"
+                write_predictions_eval(predictions_eval, args.in_file, mode=mode)
+                predictions_eval = []
         
-        prediction['eval'] = eval_dict
-        predictions_eval.append(prediction)
-
-        # write to file every <dump_size> instances
-        if idx == dump_size or len(predictions)-idx < dump_size:
-            write_predictions_eval(predictions_eval, args.in_file)
-            predictions_eval = []
+        except Exception as error:
+            print(f"Something went wrong for instance:\n{prediction}")
+            print(f"\n{type(error).__name__} - {error}")
 
     
 

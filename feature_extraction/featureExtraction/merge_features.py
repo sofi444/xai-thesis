@@ -61,7 +61,7 @@ def merge_features(args):
 
     #print("merged %d comments, %d features" % (len(merged), len(merged.columns)))
     #print(tabulate(merged.head(n=2), headers="keys", tablefmt="psql"))
-    print(merged.head(n=2))
+    #print(merged.head(n=2))
     
     print("writing merged data to %s" % os.path.join(PATH_PREFIX, args.output_path))
     merged.to_csv(os.path.join(PATH_PREFIX, args.output_path), index=False)

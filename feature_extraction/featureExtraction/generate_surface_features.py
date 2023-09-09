@@ -19,7 +19,8 @@ def pipeline(input_path, model_identifier, output_path, comment_column):
     comments = list(data[comment_column])
     # create a dictionary of lists that contains all features as keys
     features = defaultdict(list)
-    print("extracting features...")
+    print("extracting SURFACE features...")
+    
     for doc in tqdm.tqdm(model.pipe(comments)):
         tokenized = '\n'.join(' '.join(str(token) for token in sentence)
                               for sentence in doc.sents)
@@ -55,7 +56,7 @@ if __name__ == '__main__':
                         default=None,
                         help="path to input file")
     parser.add_argument("--output_path",
-                        default="output/SYNTAX_results.csv",
+                        default="output/SURFACE_results.csv",
                         help="path to output file")
     parser.add_argument("--comment_column",
                         default="response",
