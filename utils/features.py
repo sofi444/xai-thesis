@@ -2,10 +2,11 @@ import os
 import pandas as pd
 import json
 import numpy as np
+import itertools
 
 from tqdm import tqdm
 
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import SequentialFeatureSelector
@@ -14,42 +15,50 @@ from sklearn.linear_model import LogisticRegression
 
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FEATURES_DIR = os.path.join(PROJECT_DIR, "feature_extraction")
+FEATURES_DIR = os.path.join(PROJECT_DIR, "feature_extraction/featureExtraction/output/")
 RESPONSES_DIR = os.path.join(PROJECT_DIR, "responses/")
 
-features_filepath = os.path.join(FEATURES_DIR, "featureExtraction/output/merged_features.csv")
-responses_filepath = os.path.join(RESPONSES_DIR, "formatted_turbo14081857_turbo1508_eval.json")
+features_filepath = "feature_extraction/featureExtraction/output/04091703_features.csv"
+responses_filepath = "responses/04091703_parsed_turbo_2000train_clean_eval.jsonl"
 
 
-def load_features(filepath):
+def load_features(features_file):
     '''
     Load features from .csv file
     Return a pandas dataframe
     '''
-    return pd.read_csv(filepath)
+    if os.path.isfile(features_file):
+        features_df = pd.read_csv(features_file)
+    else:
+        filepath = os.path.join(FEATURES_DIR, features_file)
+        features_df = pd.read_csv(filepath)
+    
+    return features_df
 
 
-def load_labels(filepath):
+def load_labels(responses_file):
     '''
     Load evaluated responses (i.e., with predicted labels/outcomes)
     Return map between ids and labels as pandas dataframe
     '''
-    with open(filepath, "r") as f:
-        responses = json.load(f)
-
-    if filepath.endswith(".json"): # all responses
-        idx_label_map = {
-            int(idx):res_dict['outcome'] for idx, res_dict in responses.items()
-        }
-    elif filepath.endswith(".jsonl"): # batch responses
-        idx_label_map = {
-            int(res_dict['idx']):res_dict['outcome'] for res_dict 
-            in responses
-        }
+    if os.path.isfile(responses_file):
+        filepath = responses_file
     else:
-        raise ValueError("Filepath must end with .json or .jsonl")
+        filepath = os.path.join(RESPONSES_DIR, responses_file)
+
+    with open(filepath, "r") as f:
+        # jsonl
+        responses = [json.loads(line) for line in f.readlines()]
     
-    return pd.DataFrame.from_dict(idx_label_map, orient="index", columns=["outcome"])
+    idx_label_map = {
+        int(res['idx']):res['eval']['outcome'] for res in responses
+    }
+    
+    labels_df = pd.DataFrame.from_dict(
+        idx_label_map, orient="index", columns=["outcome"]
+    )
+
+    return labels_df
 
 
 def merge_and_filter(features_df, labels_df, only_numeric=True):
@@ -78,13 +87,12 @@ def merge_and_filter(features_df, labels_df, only_numeric=True):
     return data_df
     
 
-def scale_features(data_df):
+def scale_features(data_df, scaler=StandardScaler()):
     '''
     Normalize the values of the features (to the same range/scale)
     Returns normalized pandas dataframe
     '''
     features = [col for col in data_df.columns if col != "outcome"]
-    scaler = StandardScaler()
     data_df[features] = scaler.fit_transform(data_df[features])
     
     return data_df
@@ -121,39 +129,39 @@ def remove_collinear_features(features_df, threshold, target_name='outcome'):
     target_name: name of the target column
     '''
     print("Removing collinear features...")
-    corr_matrix = features_df.corr()
+
+    corr_matrix = features_df.corr().abs()
     to_drop = []
 
-    # Iterate through the correlation matrix and compare correlations
-    for i in tqdm(range(len(corr_matrix.columns) - 1)):
-        for j in range(i+1):
-            item = corr_matrix.iloc[j:(j+1), (i+1):(i+2)]
-            col = item.columns
-            row = item.index
-            val = abs(item.values)
+    # Correlation with target for all features
+    corr_with_target = features_df.drop(
+        columns=[target_name]
+        ).apply(
+            lambda x: x.corr(features_df[target_name])
+            )
 
-            if val >= threshold: # exceeds the threshold
-                feature1, feature2 = col.values[0], row.values[0]
-
-                if feature1 in to_drop or feature2 in to_drop:
-                    continue
-                
-                correlation = round(val[0][0], 2)
-
-                # Calculate correlations with outcome for both features
-                corr_f1_y = features_df[feature1].corr(features_df[target_name])
-                corr_f2_y = features_df[feature2].corr(features_df[target_name])
-
-                # Drop the feature with lower correlation to outcome
-                if corr_f1_y <= corr_f2_y:
-                    to_drop.append(feature1)
-                else:
-                    to_drop.append(feature2)
+    print("Iterating through all pairs of features...")
+    feature_pairs = list(itertools.combinations(corr_matrix.columns, 2))
     
-    no_coll_df = features_df.drop(columns=to_drop)
+    for feature1, feature2 in tqdm(feature_pairs):
+        # If the correlation between the features is above the threshold
+        if corr_matrix.loc[feature1, feature2] >= threshold:
+            # If either feature is already marked to drop, skip this pair
+            if feature1 in to_drop or feature2 in to_drop:
+                continue
 
-    print(f"Done! # selected features: {len(no_coll_df.columns)}")
-    return no_coll_df
+            # Drop the feature with lower correlation to outcome
+            if corr_with_target[feature1] <= corr_with_target[feature2]:
+                to_drop.append(feature1)
+            else:
+                to_drop.append(feature2)
+
+    # Drop marked features from the dataframe
+    features_df.drop(columns=to_drop, inplace=True)
+
+    print(f"Done! Number of selected features: {len(features_df.columns)}")
+    
+    return features_df
 
 
 def sequential_selection(data_df, model, **kwargs):
@@ -234,8 +242,14 @@ def ensemble_selection(data_df, selected_features_by_methods, type="all"):
             feature for feature, count in feature_counts.items() if count >= most
         ]
     elif type == "all":
+        # keep features that appear in all methods
         selected_features = [
             feature for feature, count in feature_counts.items() if count == len(selected_features_by_methods)
+        ]
+    elif type == "any":
+        # keep features that appear in at least one method
+        selected_features = [
+            feature for feature, count in feature_counts.items() if count >= 1
         ]
     
     print(f"Done! # selected features: {len(selected_features)}")
@@ -328,7 +342,7 @@ if __name__ == "__main__":
     
     print(f"# features after feature selection: {len(final_set)}")
     
-    out_filepath = os.path.join(FEATURES_DIR, "selected_features.txt")
+    out_filepath = os.path.join(PROJECT_DIR, "feature_extraction", "selected_features.txt")
     with open(out_filepath, "w") as f:
         for feature in final_set:
             f.write(f"{feature}\n")
