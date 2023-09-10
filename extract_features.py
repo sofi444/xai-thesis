@@ -24,7 +24,7 @@ FEATURE_EXTRACTION_DIR = os.path.join(PROJECT_DIR, "feature_extraction")
 def main(args):
     
     print(f"Extracting features from {args.in_file}")
-    """
+    
     '''1. CREATE CSV FOR FEATURE EXTRACTION'''
 
     create_csv = sp.Popen([
@@ -35,11 +35,11 @@ def main(args):
     ).wait()
     if create_csv != 0: # exit code (0 = success)
         raise Exception("Error creating csv file for feature extraction")
-    """
+    
     csv_filename = args.in_file.split("/")[-1].split(".")[0] + ".csv"
     csv_filepath = os.path.join(FEATURE_EXTRACTION_DIR, "responses-fe", csv_filename)
     
-    """
+    
     '''2. CREATE TXT FILES FOR FEATURE EXTRACTION'''
 
     create_txt_files = sp.Popen([
@@ -75,7 +75,7 @@ def main(args):
     ).wait()
     if run_seance != 0:
         raise Exception("Error running SEANCE")
-    """
+    
     seance_filepath = os.path.join(
         FEATURE_EXTRACTION_DIR, 
         "featureExtraction", 
@@ -83,7 +83,7 @@ def main(args):
         "SEANCE_results.csv"
     )
     
-    """
+    
     '''4. RUN TAALED'''
 
     print('''
@@ -103,7 +103,7 @@ def main(args):
     ).wait()
     if run_taaled != 0:
         raise Exception("Error running TAALED")
-    """
+    
     taaled_filepath = os.path.join(
         FEATURE_EXTRACTION_DIR,
         "featureExtraction",
