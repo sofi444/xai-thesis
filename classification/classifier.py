@@ -6,13 +6,23 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-
-import statsmodels.api as sm
+from sklearn.metrics import (
+    confusion_matrix,
+    classification_report
+)
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 import joblib
 
 import argparse
+
+import sys
+sys.path.append("/Users/q616967/Workspace/thesis/uni/xai-thesis/")
+import utils.features
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 
@@ -26,26 +36,44 @@ STATS_DIR = os.path.join(PROJECT_DIR, "classification/stats/")
 
 
 def load_x_y(features_filename, responses_filename):
-    features_df = pd.read_csv(
-        os.path.join(FEATURES_DIR, features_filename))
+    
+    # load features (x)
+    features_df = utils.features.load_features(features_filename)
 
-    with open(os.path.join(RESPONSES_DIR, responses_filename), "r") as f:
-        responses = json.load(f)
+    # load labels (y)
+    labels_df = utils.features.load_labels(responses_filename)
 
-    idx_outcome_dict = {int(idx):res_dict['outcome'] for idx, res_dict in responses.items()}
+    # merge
+    data_df = utils.features.merge_and_filter(features_df, labels_df)
 
-    # tmp - only first 5 responses
-    #idx_outcome_dict = {idx:outcome for idx, outcome in idx_outcome_dict.items() if idx < 5}
+    # convert labels from 'False'/'True' to 0/1
+    #data_df['outcome'] = data_df['outcome'].astype(int)
 
-    labels_df = pd.DataFrame.from_dict(idx_outcome_dict, columns=['outcome'], orient='index')
+    # normalize + select features
+    data_df = manipulate_features(data_df)
 
-    try:
-        assert len(features_df) == len(labels_df)
-    except AssertionError:
-        print("Length mismatch between features and labels")
+    print(f"Instances: {len(data_df)}\nFeatures: {len(data_df.columns)-1}")
 
-    # merge on index
-    data_df = pd.merge(features_df, labels_df, left_index=True, right_index=True)
+    return data_df
+
+
+
+def manipulate_features(data_df):
+    
+    # normalize features
+    data_df = utils.features.scale_features(
+        data_df, 
+        scaler=MinMaxScaler(
+            feature_range=(0, 1)
+        )
+    )
+
+    if feature_set_type == "all-col":
+        # filter out collinear features
+        data_df = utils.features.remove_collinear_features(
+            data_df,
+            threshold=0.8
+        )
 
     return data_df
 
@@ -68,22 +96,30 @@ def prepare_splits(data_df, test_size=0.2, random_state=1):
 
 
 def train(X_train, y_train):
-    model = LogisticRegression(random_state=1)
+    model = LogisticRegression(
+        penalty='l2', # l2 defaul
+        dual=False, # dual=False when n_samples > n_features. default False (True only for liblinear solver)
+        C=1, # inv of regularization strength. smaller values, stronger regularization. default 1.0
+        #fit_intercept=True, # add intercept to the decision function. default True
+        #intercept_scaling=1, # only used when solver='liblinear' and self.fit_intercept=True. default 1
+        class_weight=None, # 'balanced' or dict {class_label: weight}. default None
+        random_state=1, # when solver='sag','saga' or 'liblinear'. default None
+        solver='lbfgs', # lbfgs default
+            # For small datasets, liblinear is a good choice, whereas sag and saga are faster for large ones;
+            # For multiclass problems, only newton-cg, sag, saga and lbfgs handle multinomial loss;
+            # liblinear is limited to one-versus-rest schemes.
+            # newton-cholesky is a good choice for n_samples >> n_features, especially with one-hot encoded categorical features with rare categories. Note that it is limited to binary classification and the one-versus-rest reduction for multiclass classification. Be aware that the memory usage of this solver has a quadratic dependency on n_features because it explicitly computes the Hessian matrix.
+            # The choice of the algorithm depends on the penalty chosen. Supported penalties by solver:
+            # lbfgs - [l2, None]
+            # liblinear - [l1, l2]
+            # newton-cg - [l2, None]
+            # newton-cholesky - [l2, None]
+            # sag - [l2, None]
+            # saga - [elasticnet, l1, l2, None]
+        max_iter=1000, # default 100
+    )
     model.fit(X_train, y_train)
     return model
-
-
-
-def train_statsmodels(X_train, y_train): # not in use
-    X_train = sm.add_constant(X_train)
-    model = sm.Logit(y_train, X_train)
-    model.fit()
-    return model
-
-
-
-def _get_model_id():
-    return dt.datetime.now().strftime("%d%m%H%M")
 
 
 
@@ -102,52 +138,79 @@ def save_predictions(y_pred, test_idxs, id):
             indent=4)
 
     
-def save_stats(stats, id):
 
-    class NumpyEncoder(json.JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, np.ndarray):
-                return obj.tolist()
-            return json.JSONEncoder.default(self, obj)
-    
-    stats_filepath = os.path.join(STATS_DIR, f"stats_{id}.json")
-    json_object = json.dumps(stats, cls=NumpyEncoder)
+def save_stats(stats):
+    out_filename = f"{id}_{feature_set_type}_{n_instances}"
+    out_filepath = os.path.join(STATS_DIR, f"{out_filename}.json")
 
-    with open(stats_filepath, "w") as f:
-        f.write(json_object)
+    with open(out_filepath, "w") as f:
+        json.dump(stats, f, indent=4)
+
+
+
+def display_results(y_test, y_pred, show_cm=True):
+
+    print(classification_report(y_test, y_pred))
+
+    if show_cm:
+        plt.figure(figsize=(8,8))
+        sns.set(font_scale = 1.5)
+
+        cm = confusion_matrix(y_test, y_pred)
+        viz = sns.heatmap(
+            cm, 
+            annot=True, # show numbers in the cells
+            fmt='d', # show numbers as integers
+            cbar=False, # don't show the color bar
+            cmap='flag', # customize color map
+            vmax=175 # to get better color contrast
+        )
+        viz.set_xlabel("Predicted", labelpad=20)
+        viz.set_ylabel("Actual", labelpad=20)
+        plt.show()
 
 
 
 def main_sklearn(args):
+    global id, feature_set_type
+    id = args.features_filename.split("/")[-1].split("_")[0]
+    feature_set_type = args.feature_set_type
 
     data_df = load_x_y(args.features_filename, args.responses_filename)
     X_train, y_train, X_test, y_test = prepare_splits(data_df, 
                                                       test_size=0.2, 
                                                       random_state=1)
 
+    global n_instances
+    n_instances = len(data_df)
+
     # idxs in test set
     test_idxs = X_test.index.tolist()
 
     ''' Training '''
     model = train(X_train, y_train)
-    
+
     ''' Evaluation '''
     y_pred = model.predict(X_test) # numpy array with numpy.bool_ values
-    accuracy = accuracy_score(y_test, y_pred)
-    print(f"\nACCURACY: {accuracy}")
+    display_results(y_test, y_pred, show_cm=False)
 
     ''' Model stats'''
-    model_stats = {'intercept': model.intercept_, 
-                   'coefficients': model.coef_,
-                   'score': model.score(X_train, y_train),
-                   'accuracy': accuracy}
+    model_stats = {
+        'model': model.__class__.__name__,
+        'feat_set': feature_set_type,
+        'coefficients': {
+            feature: coef for feature, coef 
+            in zip(X_train.columns, model.coef_[0])
+        },
+        'intercept': model.intercept_[0],
+        'scores': classification_report(y_test, y_pred, output_dict=True)
+    }
     
     ''' Save model, predictions, stats '''
     if args.save:
-        id = _get_model_id()
-        save_model(model, id)
-        save_stats(model_stats, id)
-        save_predictions(y_pred, test_idxs, id)
+        #save_model(model, id)
+        #save_predictions(y_pred, test_idxs, id)
+        save_stats(model_stats)
         print(f"\nSaved model, predictions and stats with id: {id}")
 
 
@@ -161,20 +224,17 @@ if __name__ == "__main__":
                         type=str,
                         default="merged_features.csv",
                         help="name of the file with feautures extracted from LLM responses")
-    
     parser.add_argument("--responses_filename",
                         type=str,
                         default="formatted_og03081353_run0808_gpt-default_eval.json",
                         help="name of file with responses; used to extract the gold labels")
-    
-    parser.add_argument("--lr_type",
-                        type=str,
-                        default="sklearn",
-                        help="Use LogisticRegression from sklearn or statsmodels")
-    
     parser.add_argument("--save",
                         action="store_true",
                         help="include --save to save the model and predictions")
+    parser.add_argument("--feature_set_type",
+                        default="all",
+                        choices=["all", "all-col"],
+                        help="feature set used for training")
     
     args = parser.parse_args()
     main_sklearn(args)
