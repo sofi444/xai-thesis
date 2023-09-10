@@ -8,7 +8,7 @@ import json
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-responses_to_convert = 'responses/14081857_parsed_turbo_turbo.jsonl'
+responses_to_convert = 'responses/04091703_parsed_turbo_2000train_clean_eval.jsonl'
 
 
 old_responses_path = os.path.join(PROJECT_DIR, responses_to_convert)
@@ -91,4 +91,22 @@ if responses_to_convert == 'responses/14081857_parsed_turbo_turbo.jsonl':
     with open(new_responses_path, "a+") as f:
         for response in responses:
             response['parsed'] = response.pop('format')
+            f.write(json.dumps(response) + "\n")
+
+
+if '04091703' in responses_to_convert:
+    # issue: the uuids are wrong
+    # reload original data file to get the correct uuids
+    data_path = os.path.join(PROJECT_DIR, 'data/commonsenseQA/train_filtered.jsonl')
+    with open(data_path, "r") as f:
+        data = [json.loads(line) for line in f.readlines()]
+        # only used the first 2000 for generation
+    
+    with open(old_responses_path, "r") as f:
+        responses = [json.loads(line) for line in f.readlines()]
+    
+    new_responses_path = old_responses_path+'_new.jsonl'
+    with open(new_responses_path, "a+") as f:
+        for idx, response in enumerate(responses):
+            response['uuid'] = data[idx]['id']
             f.write(json.dumps(response) + "\n")

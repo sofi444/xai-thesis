@@ -122,8 +122,9 @@ def main(args):
     # run chain - batch calls
     elif args.batch_calls:
         inputs = []
+        uuids = []
         for idx, instance in tqdm.tqdm(enumerate(data)):
-            uuid = instance["id"]
+            uuids.append(instance["id"])
             inputs.append({
                 'question':instance["stem"],
                 'choice_A':instance["choice_A"],
@@ -135,10 +136,10 @@ def main(args):
             
             if len(inputs) == batch_size or len(data)-idx < batch_size:
                 batch_responses = chain.batch(inputs) # call
-                inputs = [] # reset inputs
+                inputs, uuids = [], [] # reset
                 
                 batch_responses_out = []
-                for response in batch_responses:
+                for uuid, response in zip(uuids, batch_responses):
                     batch_responses_out.append(
                         {'idx':main_idx,
                         'uuid':uuid,
