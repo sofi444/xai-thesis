@@ -300,13 +300,13 @@ class MyApp: #this is the class for the gui and the text analysis
 def main(indir, outdir, var_dict):
 	
 	import tkinter.messagebox
-	if indir is "":
+	if indir == "":
 		tkinter.messagebox.showinfo("Supply Information", "Choose Input Directory")
-	if outdir is "":
+	if outdir == "":
 		tkinter.messagebox.showinfo("Choose Output Directory", "Choose Output Directory")
 
 	
-	if indir is not "" and outdir is not "":
+	if indir != "" and outdir != "":
 		dataQueue.put("Starting TAALED...")
 	
 	# ! deprecated

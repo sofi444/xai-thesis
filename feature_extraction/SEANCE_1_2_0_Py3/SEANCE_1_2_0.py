@@ -322,11 +322,11 @@ class MyApp:
 	def runprogram(self, event):
 		self.poll(self.progress)
 		import tkinter.messagebox
-		if self.dirname is "":
+		if self.dirname == "":
 			tkinter.messagebox.showinfo("Supply Information", "Choose Input Directory")
-		if self.outdirname is "":
+		if self.outdirname == "":
 			tkinter.messagebox.showinfo("Choose Output Filename", "Choose Output Filename")
-		if self.dirname is not "" and self.outdirname is not "":
+		if self.dirname != "" and self.outdirname != "":
 	
 			dataQueue.put("Starting Sentiment Tool...")
 			start_thread(main, self.dirname, self.outdirname, self.var_list)
@@ -350,7 +350,7 @@ def main(indir, outfile,var_list):
 			dict ={}
 
 			for entries in database_file:  
-				if entries[0] is '#': #ignores first line which contains category information
+				if entries[0] == '#': #ignores first line which contains category information
 					continue
 			
 				entries = entries.split("\t")
@@ -661,7 +661,7 @@ def main(indir, outfile,var_list):
 		#print "Compiling Lemma Dict...\n"
 		for line in lemma_list:
 			#ignores first lines
-			if line[0] is '#':
+			if line[0] == '#':
 				continue
 			#allows use of each line:
 			entries=line.split()
