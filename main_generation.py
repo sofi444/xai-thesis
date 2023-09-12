@@ -85,7 +85,7 @@ def main(args):
     sleep_if_more_than = 100
     run_id = utils.output.get_run_id()
     main_idx = 0
-    batch_size = 8 # batch call every int | write to file every int
+    batch_size = 16 # batch call every int | write to file every int
 
     if not args.batch_calls:
         responses = []
@@ -115,8 +115,8 @@ def main(args):
                     responses = []
             
             if num_loaded >= sleep_if_more_than and main_idx % sleep_every == 0:
-                print(f"Sleeping for 20 seconds...{main_idx}/{num_loaded}")
-                time.sleep(20)
+                print(f"Sleeping for 10 seconds...{main_idx}/{num_loaded}")
+                time.sleep(10)
 
 
     # run chain - batch calls
@@ -136,7 +136,6 @@ def main(args):
             
             if len(inputs) == batch_size or len(data)-idx < batch_size:
                 batch_responses = chain.batch(inputs) # call
-                inputs, uuids = [], [] # reset
                 
                 batch_responses_out = []
                 for uuid, response in zip(uuids, batch_responses):
@@ -146,13 +145,15 @@ def main(args):
                         'text':response['text']}
                     )
                     main_idx += 1
+                
+                inputs, uuids = [], [] # reset
 
                 if args.save:
                     utils.output.write_batch_responses(batch_responses_out, run_id)
                     batch_responses_out = []
 
                 if num_loaded >= sleep_if_more_than and main_idx % sleep_every == 0:
-                    print(f"Sleeping for 20 seconds...{main_idx}/{num_loaded}")
+                    print(f"Sleeping for 10 seconds...{main_idx}/{num_loaded}")
                     time.sleep(20)
 
 
