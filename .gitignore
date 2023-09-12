@@ -209,3 +209,4 @@ processed_uuid/*
 feature_extraction/featureExtraction/textfiles/*
 feature_extraction/featureExtraction/outputs/*
 classification/models/*
+classification/preds/*
