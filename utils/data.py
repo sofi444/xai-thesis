@@ -18,12 +18,12 @@ def load_data(split:str='dev', dataset:str='commonsenseQA', num_instances:int=No
 
     DATASET_DIR = os.path.join(DATA_DIR, dataset)
     
-    if split not in ['train', 'dev', 'test']:
-        raise ValueError("split arg must be 'train', 'dev' or 'test'")
+    if split not in ['train', 'dev', 'test', 'merged']:
+        raise ValueError("split must be train | dev | test | merged")
     
     files_from_split = [f for f in os.listdir(DATASET_DIR) if split in f]
 
-    if filtered:
+    if filtered: # if a filtered version exists, load that one
         filenames = [f for f in files_from_split if 'filtered' in f]
     else:
         filenames = files_from_split
