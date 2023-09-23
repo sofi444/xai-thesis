@@ -28,9 +28,13 @@ def load_features(features_file):
     Return a pandas dataframe
     '''
     if os.path.isfile(features_file):
-        features_df = pd.read_csv(features_file)
+        filepath = features_file
     else:
         filepath = os.path.join(FEATURES_DIR, features_file)
+    
+    if filepath.endswith(".gz"): # if zipped
+        features_df = pd.read_csv(filepath, compression='gzip')
+    else:
         features_df = pd.read_csv(filepath)
     
     return features_df
