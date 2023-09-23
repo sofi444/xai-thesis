@@ -206,7 +206,12 @@ ipython_config.py
 # my tmp files
 tmp*
 processed_uuid/*
+
+# large files - don't commit
 feature_extraction/featureExtraction/textfiles/*
 feature_extraction/featureExtraction/outputs/*
 classification/models/*
 classification/preds/*
+classification/finetune-venv/*
+classification/split_datasets/*
+classification/shap_values/*
