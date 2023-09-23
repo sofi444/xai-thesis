@@ -19,6 +19,8 @@ import argparse
 
 import sys
 sys.path.append("/Users/q616967/Workspace/thesis/uni/xai-thesis/")
+sys.path.append("/mount/studenten-temp1/users/dpgo/xai-thesis/")
+sys.path.append("../")
 import utils.features
 
 import matplotlib.pyplot as plt

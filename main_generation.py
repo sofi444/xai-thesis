@@ -154,7 +154,7 @@ def main(args):
 
                 if num_loaded >= sleep_if_more_than and main_idx % sleep_every == 0:
                     print(f"Sleeping for 10 seconds...{main_idx}/{num_loaded}")
-                    time.sleep(20)
+                    time.sleep(10)
 
 
 
