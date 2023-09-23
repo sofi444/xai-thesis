@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 '''
 device('cuda') uses all gpus, set CUDA_VISIBLE_DEVICES before running script
-    CUDA_VISIBLE_DEVICES=0,1 python3 utils/codellama.py
+    CUDA_VISIBLE_DEVICES=0,1 python3 parse_feaures.py
 
 setting gpus as script ('cuda:0,1') give invald string error
 '''
@@ -70,6 +70,8 @@ def write_parsed_responses(parsed_responses, in_file):
     out parsed: json lines {id: idx, uuid: uuid, response: freetext response, parsed: {answer_letter: X, answer_text: text}}, {...}
     '''
     out_file = in_file.replace("freetext", "parsed")
+    if in_file.endswith(".gz"):
+        out_file = out_file.replace(".gz", "")
     
     out_filepath = os.path.join(
         PROJECT_DIR, "responses", out_file
@@ -107,21 +109,20 @@ def catch_errors(parsed_response:dict):
 
 
 
-def get_uuid_choices_map(data_file, responses):
+def get_uuid_choices_map(split_to_load, responses):
 
-    data_filepath = os.path.join(
-        DATA_DIR, data_file
-    ) if "/" not in data_file else os.path.join(DATA_DIR, data_file)
-
-    with open(data_filepath, "r") as f:
-        for line in f.readlines():
-            data = [json.loads(line) for line in f]
+    data = utils.data.load_data(
+        split=split_to_load,
+        dataset="commonsenseQA",
+        num_instances=None,
+        filtered=True
+    )
     
     uuid_choices_map = {}
     for instance in data:
         choices = instance["question"]["choices"]
         choices = ", ".join([f"{choice['label']}. {choice['text']}" for choice in choices])
-        uuid_choices_map[instance["uuid"]] = choices
+        uuid_choices_map[instance["id"]] = choices     
     
     return uuid_choices_map
 
@@ -139,7 +140,10 @@ def main(args):
     )
 
     if args.with_choices:
-        uuid_choices_map = get_uuid_choices_map(data_file=args.og_data, responses=responses)
+        uuid_choices_map = get_uuid_choices_map(
+            split_to_load=args.og_data_split, 
+            responses=responses
+        )
 
     if args.model == "codellama":
         #model, tokenizer = utils.models.load_model(model=args.model)
@@ -149,7 +153,7 @@ def main(args):
         # if few shot, append examples to sys prompt
 
         parsed_responses = []
-        dump_size = 4
+        dump_size = 16
         main_idx = 0
 
         for response in tqdm(responses):
@@ -283,9 +287,9 @@ if __name__ == "__main__":
     parser.add_argument("--with_choices",
                         action='store_true',
                         help="include to add choices to the prompt, omit otherwise.")
-    parser.add_argument("--og_data",
+    parser.add_argument("--og_data_split",
                         type=str,
-                        help="original data file to get choices from")
+                        help="split of original data to get choices from: train | dev | test | merged")
     
 
     args = parser.parse_args()
