@@ -1,0 +1,232 @@
+{
+    "vader_neutral If_Lasswell": {
+        "coefficient": -0.5173566602027507,
+        "p_value": 5.861063380037753e-34,
+        "vif": 0.9999999999999984
+    },
+    "Causal_GI_adverbs ttr": {
+        "coefficient": 0.4827778036378788,
+        "p_value": 4.2600369603705036e-38,
+        "vif": 1.0000000000000007
+    },
+    "vader_neutral VERB": {
+        "coefficient": 0.45767877306809035,
+        "p_value": 2.2652984873324555e-12,
+        "vif": 1.0000000000000002
+    },
+    "vader_neutral Hu_GI": {
+        "coefficient": 0.4042140404856982,
+        "p_value": 1.848354224529018e-07,
+        "vif": 1.0000000000000018
+    },
+    "Sv_GI_verbs_neg_3 VERB": {
+        "coefficient": 0.38545062795855267,
+        "p_value": 1.0263268678024725e-19,
+        "vif": 1.0
+    },
+    "vader_neutral Undrst_GI_neg_3": {
+        "coefficient": 0.3336909997740311,
+        "p_value": 0.0005361143500052381,
+        "vif": 1.0000000000000018
+    },
+    "attention_neg_3 basic_nfunction_types": {
+        "coefficient": -0.32189707685104296,
+        "p_value": 6.923381174553515e-64,
+        "vif": 0.9999999999999996
+    },
+    "vader_neutral ttr": {
+        "coefficient": 0.31281945206323597,
+        "p_value": 6.935635869679449e-44,
+        "vif": 0.9999999999999998
+    },
+    "lexical_density_tokens ttr": {
+        "coefficient": 0.2849053861579505,
+        "p_value": 2.2015377970905384e-33,
+        "vif": 0.9999999999999998
+    },
+    "vader_neutral Know_GI": {
+        "coefficient": -0.2791713736950628,
+        "p_value": 0.002175719942374286,
+        "vif": 1.0000000000000007
+    },
+    "vader_neutral Tool_GI": {
+        "coefficient": 0.2785669012053012,
+        "p_value": 1.8026721982162673e-07,
+        "vif": 0.9999999999999962
+    },
+    "vader_neutral Know_GI_verbs": {
+        "coefficient": 0.26153120543342284,
+        "p_value": 3.477955241659586e-17,
+        "vif": 1.0000000000000027
+    },
+    "ttr NOUN": {
+        "coefficient": 0.25727300981613643,
+        "p_value": 1.1575268691098893e-32,
+        "vif": 0.9999999999999998
+    },
+    "aptitude basic_nfunction_types": {
+        "coefficient": -0.25222507292189655,
+        "p_value": 2.035166585158451e-59,
+        "vif": 0.9999999999999998
+    },
+    "vader_neutral Pstv_GI": {
+        "coefficient": 0.23025413077413467,
+        "p_value": 0.00041247703536915407,
+        "vif": 1.0000000000000004
+    },
+    "attention_verbs basic_nfunction_types": {
+        "coefficient": -0.2296412737142104,
+        "p_value": 4.2549572241702366e-63,
+        "vif": 1.0
+    },
+    "vader_neutral lexical_density_tokens": {
+        "coefficient": 0.21801687206842904,
+        "p_value": 1.3829102527755281e-11,
+        "vif": 1.0000000000000002
+    },
+    "Sv_GI_verbs_neg_3 NOUN": {
+        "coefficient": 0.21129377427404764,
+        "p_value": 5.569403445969657e-07,
+        "vif": 1.0
+    },
+    "Passive_GI_verbs basic_nfunction_types": {
+        "coefficient": -0.20272836992843382,
+        "p_value": 6.733171236753216e-33,
+        "vif": 0.9999999999999998
+    },
+    "vader_neutral Pstv_GI_adjectives": {
+        "coefficient": 0.19399566362273732,
+        "p_value": 7.568988851031515e-06,
+        "vif": 1.000000000000003
+    },
+    "vader_neutral Comform_GI_verbs": {
+        "coefficient": 0.18236690714229425,
+        "p_value": 9.387693627534263e-12,
+        "vif": 1.0000000000000027
+    },
+    "If_Lasswell basic_nfunction_types": {
+        "coefficient": -0.181655725905581,
+        "p_value": 1.0870409056642672e-68,
+        "vif": 0.9999999999999996
+    },
+    "Sv_GI_verbs_neg_3 flesch": {
+        "coefficient": 0.18152077467569863,
+        "p_value": 2.6819439650412113e-13,
+        "vif": 1.0
+    },
+    "vader_neutral Wlttot_Lasswell_neg_3": {
+        "coefficient": 0.181091981649423,
+        "p_value": 3.333177363555927e-06,
+        "vif": 0.9999999999999984
+    },
+    "vader_neutral Virtue_GI_adverbs_neg_3": {
+        "coefficient": 0.17616094406439994,
+        "p_value": 0.0038023193267345814,
+        "vif": 0.9999999999999982
+    },
+    "flesch PUNCT": {
+        "coefficient": 0.17129238560705778,
+        "p_value": 2.6895498841453715e-16,
+        "vif": 1.0000000000000004
+    },
+    "flesch VERB": {
+        "coefficient": 0.16575432159795997,
+        "p_value": 2.8508842161841535e-12,
+        "vif": 1.0
+    },
+    "vader_neutral Eval_GI_adverbs_neg_3": {
+        "coefficient": 0.16449568657339325,
+        "p_value": 0.0025755471197516514,
+        "vif": 0.9999999999999956
+    },
+    "Know_GI attention_neg_3": {
+        "coefficient": -0.16338866243687303,
+        "p_value": 1.5111316033606476e-08,
+        "vif": 1.0000000000000002
+    },
+    "attention_neg_3 Quan_GI_neg_3": {
+        "coefficient": -0.14529920026780024,
+        "p_value": 1.1788948346589992e-07,
+        "vif": 1.0000000000000002
+    },
+    "flesch SCONJ": {
+        "coefficient": 0.14278604368823816,
+        "p_value": 8.780174195792313e-05,
+        "vif": 0.9999999999999998
+    },
+    "vader_neutral Ngtv_GI": {
+        "coefficient": 0.14274680691737984,
+        "p_value": 2.8639356372536904e-09,
+        "vif": 1.0
+    },
+    "Quan_GI_neg_3 basic_nfunction_types": {
+        "coefficient": -0.1413866627432936,
+        "p_value": 1.6930883451825384e-35,
+        "vif": 1.0000000000000002
+    },
+    "vader_neutral Intrj_GI_neg_3": {
+        "coefficient": 0.13046079016034848,
+        "p_value": 2.974550379610324e-06,
+        "vif": 1.000000000000006
+    },
+    "vader_neutral Yes_GI": {
+        "coefficient": 0.1287193536564176,
+        "p_value": 2.17145751711534e-12,
+        "vif": 1.0000000000000033
+    },
+    "aptitude Quan_GI_neg_3": {
+        "coefficient": -0.12424116970019633,
+        "p_value": 9.228185345311816e-07,
+        "vif": 1.0
+    },
+    "If_Lasswell attention_verbs": {
+        "coefficient": -0.12253762768409643,
+        "p_value": 7.599190785162978e-43,
+        "vif": 1.000000000000001
+    },
+    "If_Lasswell attention_neg_3": {
+        "coefficient": -0.11639204187609252,
+        "p_value": 4.911288136726825e-43,
+        "vif": 0.9999999999999987
+    },
+    "vader_neutral Powtot_Lasswell_adjectives": {
+        "coefficient": 0.11620038328205001,
+        "p_value": 0.001365876124864302,
+        "vif": 1.0000000000000053
+    },
+    "vader_neutral Space_GI_nouns_neg_3": {
+        "coefficient": 0.111998023014721,
+        "p_value": 0.002865662565420691,
+        "vif": 1.0000000000000016
+    },
+    "vader_neutral Powoth_Lasswell": {
+        "coefficient": -0.11196259273053791,
+        "p_value": 3.539827962441167e-08,
+        "vif": 0.999999999999998
+    },
+    "Sv_GI_verbs_neg_3 lexical_density_tokens": {
+        "coefficient": 0.11120021366104114,
+        "p_value": 1.2062085424609186e-09,
+        "vif": 1.0000000000000002
+    },
+    "Know_GI attention_verbs": {
+        "coefficient": -0.11091558892133362,
+        "p_value": 2.0910810140193522e-08,
+        "vif": 0.9999999999999996
+    },
+    "Ngtv_GI flesch": {
+        "coefficient": 0.10519724979341091,
+        "p_value": 5.416035196603939e-09,
+        "vif": 0.9999999999999996
+    },
+    "aptitude If_Lasswell": {
+        "coefficient": -0.10198423831356312,
+        "p_value": 2.8901919173369145e-42,
+        "vif": 0.9999999999999998
+    },
+    "aptitude Socrel_GI_verbs": {
+        "coefficient": -0.10081399567756938,
+        "p_value": 4.115588212635668e-11,
+        "vif": 0.9999999999999978
+    }
+}
