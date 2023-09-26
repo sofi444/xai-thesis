@@ -134,10 +134,11 @@ def main(args):
                 ngram_tokens = ngram.split()
                 ngram_idxs = []
                 for token in ngram_tokens:
-                    token_idx = tokens.index(token, current_idx)
+                    token_idx = tokens.index(token, current_idx, current_idx+args.n)
                     ngram_idxs.append(token_idx)
-                    current_idx = token_idx
-
+                    
+                current_idx += 1
+                
                 if ngram.startswith(" "):
                     ngram_tokens = ["<BOS>"] + ngram_tokens
                     ngram_idxs = [0] + ngram_idxs
