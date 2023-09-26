@@ -61,6 +61,20 @@ def load_x_y(features_filename, responses_filename):
 
 
 def manipulate_features(data_df):
+
+    # create feature set from pre-calculate sources
+    if feature_set_sources:
+        feature_set = utils.features.get_feature_set(
+            source_filenames=feature_set_sources
+        )
+        if any(" " in feature for feature in feature_set): # then there are interactions
+            data_df = utils.features.add_interactions(
+                data_df,
+                feature_set
+            )
+
+        feature_set.append('outcome')
+        data_df = data_df[feature_set]
     
     # normalize features
     data_df = utils.features.scale_features(
@@ -101,7 +115,6 @@ def manipulate_features(data_df):
         data_df = data_df[final_set]
 
     return data_df
-
 
 
 
@@ -197,11 +210,13 @@ def display_results(y_test, y_pred, show_cm=True):
 
 
 
-def main_sklearn(args):
-    global id, feature_set_type
+def main(args):
+    global id, feature_set_type, feature_set_sources
     id = args.features_filename.split("/")[-1].split("_")[0]
     feature_set_type = args.feature_set_type
+    feature_set_sources = args.feature_set_sources.split(",") if args.feature_set_sources != "" else None
 
+    ''' Data '''
     data_df = load_x_y(args.features_filename, args.responses_filename)
     X_train, y_train, X_test, y_test = prepare_splits(data_df, 
                                                       test_size=0.2, 
@@ -248,22 +263,24 @@ if __name__ == "__main__":
 
     parser.add_argument("--features_filename",
                         type=str,
-                        default="merged_features.csv",
-                        help="name of the file with feautures extracted from LLM responses")
+                        help="file with feautures extracted from LLM responses (csv or gz in output/)")
     parser.add_argument("--responses_filename",
                         type=str,
-                        default="formatted_og03081353_run0808_gpt-default_eval.json",
-                        help="name of file with responses; used to extract the gold labels")
+                        help="file with responses; used to extract the gold labels (jsonl in responses/)")
     parser.add_argument("--save",
                         action="store_true",
-                        help="include --save to save the model and predictions")
+                        help="include --save to save the model, predictions, stats")
     parser.add_argument("--feature_set_type",
-                        default="all",
-                        choices=["all", "col", "col-rfe", "col-kbest", "col-rfe-kbest"],
-                        help="feature set used for training")
+                        default="",
+                        choices=["all", "col", "col-rfe", "col-kbest", "col-rfe-kbest", ""],
+                        help="methods to use for feature selection")
+    parser.add_argument("--feature_set_sources",
+                        type=str,
+                        default="",
+                        help="sources (filenames, comma delimited str) for feature selection (json in stats/)")
     
     args = parser.parse_args()
-    main_sklearn(args)
+    main(args)
 
 
 

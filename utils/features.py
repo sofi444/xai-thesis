@@ -17,6 +17,7 @@ from sklearn.linear_model import LogisticRegression
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FEATURES_DIR = os.path.join(PROJECT_DIR, "feature_extraction/featureExtraction/output/")
 RESPONSES_DIR = os.path.join(PROJECT_DIR, "responses/")
+STATS_DIR = os.path.join(PROJECT_DIR, "classification/stats/")
 
 features_filepath = "feature_extraction/featureExtraction/output/04091703_features.csv"
 responses_filepath = "responses/04091703_parsed_turbo_2000train_clean_eval.jsonl"
@@ -63,6 +64,37 @@ def load_labels(responses_file):
     )
 
     return labels_df
+
+
+def get_feature_set(source_filenames:list):
+    
+    feature_set = set()
+    for source in source_filenames:
+        if "/" in source:
+            source = source.split("/")[-1]
+        path = os.path.join(STATS_DIR, source)
+        
+        with open(path, "r") as f:
+            stats = json.load(f)
+        
+        if "robust" in source: # pre-calculated robust features or interaction
+            feature_set.update(stats.keys())
+        else: # regular features
+            feature_set.update(stats["coefficients"].keys())
+    
+    return list(feature_set)
+
+
+def add_interactions(data_df, feature_set):
+    """ Calculate and add interactions between features to df 
+    for interaction features in feature set """
+    
+    for feature in feature_set:
+        if " " in feature: # interaction
+            feature1, feature2 = feature.split()
+            data_df[feature] = data_df[feature1] * data_df[feature2]
+    
+    return data_df
 
 
 def merge_and_filter(features_df, labels_df, only_numeric=True):
