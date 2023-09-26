@@ -120,13 +120,15 @@ def main(args):
 
     aggregated_token_importance = {}
     aggregated_ngram_importance = {}
+    aggregated_chunk_importance = {}
 
     for i in tqdm(range(shap_values.shape[0])): # instances
         
+        tokens = shap_values[i].data
+        tokens = [token.strip().lower() for token in tokens]
+        values = shap_values[i].values
+
         if args.aggregate_at_ngram_level:
-            tokens = shap_values[i].data
-            tokens = [token.strip().lower() for token in tokens]
-            values = shap_values[i].values
             ngrams = create_ngrams(tokens, args.n)
             current_idx = 0
 
@@ -173,6 +175,37 @@ def main(args):
                 )
 
 
+        if args.aggregate_at_chunk_level:
+            # text chunk = combination of tokens that have the same shap value
+            # chunk's shap values = value of one of the tokens (their are all the same)
+
+            current_chunk = ""
+            current_values = None
+            
+            for j in range(shap_values[i].shape[0]):
+                token = shap_values.data[i][j] # use token as they are (no lower, no strip)
+                values = shap_values.values[i][j]
+
+                if current_values is None: # first token
+                    current_values = values
+                    current_chunk = token
+                    continue
+                
+                if values[0] == current_values[0]: # same chunk
+                    current_chunk += token # no need to add space
+                
+                else: # new chunk detected, add chunk to dict
+                    clean_chunk = current_chunk.strip().lower()
+                    aggregated_chunk_importance = add_contribution(
+                        shap_aggregation_dict=aggregated_chunk_importance,
+                        entity_shap_values=current_values,
+                        entity=clean_chunk
+                    )
+                    # start new chunk
+                    current_values = values
+                    current_chunk = token
+
+
     if args.aggregate_at_ngram_level:
         class_avg_ngram_importance = average_shap_values(
             per_class=True,
@@ -193,6 +226,15 @@ def main(args):
             shap_aggregation_dict=aggregated_token_importance
         )
 
+    if args.aggregate_at_chunk_level:
+        class_avg_chunk_importance = average_shap_values(
+            per_class=True,
+            shap_aggregation_dict=aggregated_chunk_importance
+        )
+        overall_avg_chunk_importance = average_shap_values(
+            per_class=False,
+            shap_aggregation_dict=aggregated_chunk_importance
+        )
 
 
     if args.save:
@@ -211,6 +253,14 @@ def main(args):
                 json.dump(overall_avg_ngram_importance, f)
         except:
             print(f"Could not save NGRAM ({args.n}gram) level shap values")
+        
+        try:
+            with open(os.path.join(SHAP_DIR, "class-avg_chunk_importance_test.json"), "w") as f:
+                json.dump(class_avg_chunk_importance, f)
+            with open(os.path.join(SHAP_DIR, "overall-avg_chunk_importance_test.json"), "w") as f:
+                json.dump(overall_avg_chunk_importance, f)
+        except:
+            print("Could not save CHUNK level shap values")
 
 
 
@@ -221,6 +271,7 @@ if __name__ == "__main__":
     parser.add_argument("--save", action="store_true")
     parser.add_argument("--aggregate_at_token_level", action="store_true")
     parser.add_argument("--aggregate_at_ngram_level", action="store_true")
+    parser.add_argument("--aggregate_at_chunk_level", action="store_true")
     parser.add_argument("--n", type=int, default=2)
 
     args = parser.parse_args()
