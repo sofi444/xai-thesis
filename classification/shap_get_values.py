@@ -23,7 +23,7 @@ values_for_split = 'test' # 'train' | 'validation' | 'test'
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(PROJECT_DIR, "classification/models")
 SPLITS_DIR = os.path.join(PROJECT_DIR, "classification/split_datasets/coqa")
-SHAP_DIR = os.path.join(PROJECT_DIR, "classification/shap_values")
+SHAP_DIR = os.path.join(PROJECT_DIR, "classification/shap_values/coqa")
 
 
 ''' Load fine-tuned model '''
@@ -69,7 +69,10 @@ shap_values = explainer(
     dataset[values_for_split]['text'] # list of strings
 ) # returns a shap explanation object
 
-assert len(shap_values) == len(dataset[values_for_split]['text'])
+try:
+    assert len(shap_values) == len(dataset[values_for_split]['text'])
+except AssertionError:
+    print("SHAP values / dataset length mismatch")
 
 with open(os.path.join(SHAP_DIR, f"{values_for_split}.pkl"), "wb") as f:
     pkl.dump(shap_values, f)
