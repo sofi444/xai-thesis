@@ -38,6 +38,12 @@ def add_contribution(shap_aggregation_dict, entity_shap_values, entity):
         }
     '''
 
+    if entity not in shap_aggregation_dict:
+        shap_aggregation_dict[entity] = {
+            'neg': [],
+            'pos': []
+        }
+
     contribution_to_0 = entity_shap_values[0]
     contribution_to_1 = entity_shap_values[1]
     abs_shap_value = abs(contribution_to_0)
@@ -52,10 +58,6 @@ def add_contribution(shap_aggregation_dict, entity_shap_values, entity):
         # => store positive contribution
         contribution = abs_shap_value
         shap_aggregation_dict[entity]['pos'].append(contribution)
-    else:
-        # token does not contribute to prediction of either class
-        # (mostly happens for padding tokens)
-        pass
 
     return shap_aggregation_dict
 
@@ -116,21 +118,26 @@ def main(args):
         shap_values = pkl.load(f) 
         # shape: (n_samples, n_features (None if n not fixed), n_classes)
 
-    shap_values = shap_values[:5] #tmp
-
     aggregated_token_importance = {}
     aggregated_ngram_importance = {}
 
     for i in tqdm(range(shap_values.shape[0])): # instances
         
         if args.aggregate_at_ngram_level:
-            tokens = [token.strip().lower() for token in shap_values[i].data]
+            tokens = shap_values[i].data
+            tokens = [token.strip().lower() for token in tokens]
+            values = shap_values[i].values
             ngrams = create_ngrams(tokens, args.n)
-            shap_values = shap_values[i].values
+            current_idx = 0
 
             for ngram in ngrams:
                 ngram_tokens = ngram.split()
-                ngram_idxs = [tokens.index(token) for token in ngram_tokens]
+                ngram_idxs = []
+                for token in ngram_tokens:
+                    token_idx = tokens.index(token, current_idx)
+                    ngram_idxs.append(token_idx)
+                    current_idx = token_idx
+
                 if ngram.startswith(" "):
                     ngram_tokens = ["<BOS>"] + ngram_tokens
                     ngram_idxs = [0] + ngram_idxs
@@ -141,15 +148,9 @@ def main(args):
                     ngram = ngram + "<EOS>"
                 
                 # get shap values for ngram
-                ngram_shap_values = shap_values[ngram_idxs[0]:ngram_idxs[-1]+1]
+                ngram_shap_values = values[ngram_idxs[0]:ngram_idxs[-1]+1]
                 ngram_shap_values = np.mean(ngram_shap_values, axis=0) # sum or mean?
 
-                if ngram not in aggregated_ngram_importance:
-                    aggregated_ngram_importance[ngram] = {
-                        'neg': [],
-                        'pos': []
-                    }
-                
                 aggregated_ngram_importance = add_contribution(
                     shap_aggregation_dict=aggregated_ngram_importance,
                     entity_shap_values=ngram_shap_values,
@@ -163,11 +164,6 @@ def main(args):
                     
                 token = shap_values.data[i][j]
                 token = token.strip().lower()
-                if token not in aggregated_token_importance:
-                    aggregated_token_importance[token] = {
-                        'neg': [],
-                        'pos': []
-                    }
 
                 aggregated_token_importance = add_contribution(
                     shap_aggregation_dict=aggregated_token_importance,
