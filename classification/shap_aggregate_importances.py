@@ -238,29 +238,32 @@ def main(args):
 
 
     if args.save:
-        try:
-            with open(os.path.join(SHAP_DIR, "class-avg_token_importance_test.json"), "w") as f:
-                json.dump(class_avg_token_importance, f)
-            with open(os.path.join(SHAP_DIR, "overall-avg_token_importance_test.json"), "w") as f:
-                json.dump(overall_avg_token_importance, f)
-        except:
-            print("Could not save TOKEN level shap values")
+        if args.aggregate_at_token_level:
+            try:
+                with open(os.path.join(SHAP_DIR, "class-avg_token_importance_test.json"), "w") as f:
+                    json.dump(class_avg_token_importance, f)
+                with open(os.path.join(SHAP_DIR, "overall-avg_token_importance_test.json"), "w") as f:
+                    json.dump(overall_avg_token_importance, f)
+            except:
+                print("Could not save TOKEN level shap values")
         
-        try:
-            with open(os.path.join(SHAP_DIR, f"class-avg_{args.n}gram_importance_test.json"), "w") as f:
-                json.dump(class_avg_ngram_importance, f)
-            with open(os.path.join(SHAP_DIR, f"overall-avg_{args.n}gram_importance_test.json"), "w") as f:
-                json.dump(overall_avg_ngram_importance, f)
-        except:
-            print(f"Could not save NGRAM ({args.n}gram) level shap values")
+        if args.aggregate_at_ngram_level:
+            try:
+                with open(os.path.join(SHAP_DIR, f"class-avg_{args.n}gram_importance_test.json"), "w") as f:
+                    json.dump(class_avg_ngram_importance, f)
+                with open(os.path.join(SHAP_DIR, f"overall-avg_{args.n}gram_importance_test.json"), "w") as f:
+                    json.dump(overall_avg_ngram_importance, f)
+            except:
+                print(f"Could not save NGRAM ({args.n}gram) level shap values")
         
-        try:
-            with open(os.path.join(SHAP_DIR, "class-avg_chunk_importance_test.json"), "w") as f:
-                json.dump(class_avg_chunk_importance, f)
-            with open(os.path.join(SHAP_DIR, "overall-avg_chunk_importance_test.json"), "w") as f:
-                json.dump(overall_avg_chunk_importance, f)
-        except:
-            print("Could not save CHUNK level shap values")
+        if args.aggregate_at_chunk_level:
+            try:
+                with open(os.path.join(SHAP_DIR, "class-avg_chunk_importance_test.json"), "w") as f:
+                    json.dump(class_avg_chunk_importance, f)
+                with open(os.path.join(SHAP_DIR, "overall-avg_chunk_importance_test.json"), "w") as f:
+                    json.dump(overall_avg_chunk_importance, f)
+            except:
+                print("Could not save CHUNK level shap values")
 
 
 
