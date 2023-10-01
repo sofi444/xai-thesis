@@ -127,7 +127,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-thesis-venv/
 
 # Data
 data/commonsenseQA/.
@@ -207,12 +206,23 @@ ipython_config.py
 tmp*
 processed_uuid/*
 
+# venvs
+thesis-venv/
+classification/finetune-venv/*
+feature_extraction/ArgQualityAdapters/adapters-venv/*
+
 # large files - don't commit
-feature_extraction/featureExtraction/textfiles/*
-feature_extraction/featureExtraction/outputs/*
 classification/models/*
 classification/preds/*
-classification/finetune-venv/*
 classification/split_datasets/*
 classification/shap_values/*
-feature_extraction/ArgQualityAdapters/*
+
+# featureExtraction dir
+feature_extraction/featureExtraction/textfiles/*
+feature_extraction/featureExtraction/subset_*.txt
+
+# ArgQualityAdapters dir
+feature_extraction/ArgQualityAdapters/adapterPaths/*
+feature_extraction/ArgQualityAdapters/code/*
+!feature_extraction/ArgQualityAdapters/code/inference_simple.py
+!feature_extraction/ArgQualityAdapters/code/inference_parallel.py
