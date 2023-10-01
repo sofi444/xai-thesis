@@ -271,8 +271,8 @@ if __name__ == "__main__":
                         action="store_true",
                         help="include --save to save the model, predictions, stats")
     parser.add_argument("--feature_set_type",
-                        default="",
-                        choices=["all", "col", "col-rfe", "col-kbest", "col-rfe-kbest", ""],
+                        default="all",
+                        choices=["all", "col", "col-rfe", "col-kbest", "col-rfe-kbest"],
                         help="methods to use for feature selection")
     parser.add_argument("--feature_set_sources",
                         type=str,
