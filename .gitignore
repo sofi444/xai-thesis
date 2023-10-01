@@ -215,3 +215,4 @@ classification/preds/*
 classification/finetune-venv/*
 classification/split_datasets/*
 classification/shap_values/*
+feature_extraction/ArgQualityAdapters/*
