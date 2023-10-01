@@ -37,7 +37,8 @@ def predict(dataloader, model, out_put_path, task2label, dataset, task):
         for i in range(label_num):
             dataset[f"{task}_{i}"] = output_dic[i]
 
-    dataset.to_csv(out_put_path, sep="\t", index=False)
+    #dataset.to_csv(out_put_path, sep="\t", index=False)
+    dataset.to_csv(out_put_path, index=False)
 
 
 if __name__ == '__main__':

@@ -43,7 +43,9 @@ def predict(dataloader, model, out_put_path, task2label, dataset, task2identifie
             for i in range(label_num):
                 # get list of elements at index i
                 dataset[f"{task}_{i}"] = [el[i] for el in predictions]
-    dataset.to_csv(out_put_path, sep="\t", index=False)
+    
+    #dataset.to_csv(out_put_path, sep="\t", index=False)
+    dataset.to_csv(out_put_path, index=False)
 
 
 task2label = {"reasonableness": 1,
