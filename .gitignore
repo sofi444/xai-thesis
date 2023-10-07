@@ -204,6 +204,7 @@ ipython_config.py
 
 # my tmp files
 tmp*
+logs/*
 processed_uuid/*
 
 # venvs
