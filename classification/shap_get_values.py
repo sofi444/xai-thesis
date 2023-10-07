@@ -15,7 +15,7 @@ from transformers import TextClassificationPipeline
 from datasets import load_from_disk
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 
 
 values_for_split = 'test' # 'train' | 'validation' | 'test'
@@ -64,15 +64,26 @@ DatasetDict({
 
 
 ''' SHAP '''
-explainer = shap.Explainer(pipe, seed=1)
-shap_values = explainer(
-    dataset[values_for_split]['text'] # list of strings
-) # returns a shap explanation object
+mask_tokens = ['[MASK]', '']
 
-try:
-    assert len(shap_values) == len(dataset[values_for_split]['text'])
-except AssertionError:
-    print("SHAP values / dataset length mismatch")
+for mask in mask_tokens:
+    masker = shap.maskers.Text(tokenizer=r"\W+", collapse_mask_token=True)
+    masker.mask_token = mask
+    explainer = shap.Explainer(pipe, masker=masker, seed=1)
 
-with open(os.path.join(SHAP_DIR, f"{values_for_split}.pkl"), "wb") as f:
-    pkl.dump(shap_values, f)
+    shap_values = explainer(
+        dataset[values_for_split]['text'] # list of strings
+    ) # returns a shap explanation object
+
+    if mask == '[MASK]':
+        filename = f"{values_for_split}_mask.pkl"
+    elif mask == '':
+        filename = f"{values_for_split}_empty.pkl"
+
+    try:
+        assert len(shap_values) == len(dataset[values_for_split]['text'])
+    except AssertionError:
+        print("SHAP values / dataset length mismatch for ", filename)
+
+    with open(os.path.join(SHAP_DIR, filename), "wb") as f:
+        pkl.dump(shap_values, f)
