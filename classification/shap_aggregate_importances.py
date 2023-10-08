@@ -25,7 +25,6 @@ spacy_pipe.tokenizer = Tokenizer(spacy_pipe.vocab, token_match=re.compile(r'\S+'
 
 
 def add_contribution(shap_aggregation_dict, entity_shap_values, entity):
-
     ''' Aggregate SHAP values
 
     For binary classfication, SHAP values sum up to 0
@@ -147,18 +146,18 @@ def clean_entity(entity, choices):
     placeholder_map = collections.OrderedDict({
         "[OPT_L]": [
             # Sub option letters B-E when followed by punct or end of string
-            re.compile(r"\b[B-E]([ .,:)]|\Z)"),
+            re.compile(r"\b[B-E](\s*[.,:()-]+|\b|\Z)"),
 
             # Sub A only if followed by punct or by option text (lookahead)
-            re.compile(r"\bA[.,:)]"),
-            re.compile(fr"\bA (?=\s*(?i:{option_A}))"),
+            re.compile(r"\bA(\s*[.,:()-]+|\Z)"),
+            re.compile(fr"\bA (?=\s*[.,:)-]+(?i:{option_A}))"),
         ],
         "[OPT_T]": [
             # Sub option text only if it follow option letter
             #re.compile(fr"(?<=\[OPT_L\])\s*(?i:({option_A+'|'+other_options}))"),
 
             # Always sub option text (no lookbehind)
-            re.compile(fr"\b(?i:{option_A+'|'+other_options})([ .,:)]|\Z)"),
+            re.compile(fr"\b(?i:{option_A+'|'+other_options})\s*([.,:()]+|\Z)"),
         ],
         "[NMB]": [
             # Sub numbers
@@ -186,11 +185,11 @@ def clean_entity(entity, choices):
     entity_out = []
     for token in spacy_doc:
         if token.text in special_tokens:
-            entity_out.append(token.text.strip(" .,-\n\""))
+            entity_out.append(token.text.strip(" .,-\n\")(:?!"))
         elif token.tag_ in lemma_tags: # Sub token with its lemma
-            entity_out.append(token.lemma_.strip(" .,-\n\"").lower())
+            entity_out.append(token.lemma_.strip(" .,-\n\")(:?!").lower())
         else:
-            entity_out.append(token.text.strip(" .,-\n\"").lower())
+            entity_out.append(token.text.strip(" .,-\n\")(:?!").lower())
 
     return " ".join(entity_out)
 
@@ -208,11 +207,7 @@ def main(args):
     aggregated_chunk_importance = {}
 
     for i in tqdm(range(shap_values.shape[0])): # instances
-        if i == 3:
-            import pprint as pp
-            pp.pprint(aggregated_ngram_importance)
-            break
-        
+
         choices = map[str(dataset[i]['pandas_idx'])]['choices']
         tokens = list(shap_values[i].data)
         values = shap_values[i].values
@@ -275,7 +270,7 @@ def main(args):
             current_values = None
             
             for j in range(shap_values[i].shape[0]):
-                token = shap_values.data[i][j] # use token as they are (no lower, no strip)
+                token = shap_values.data[i][j]
                 values = shap_values.values[i][j]
 
                 if current_values is None: # first token
@@ -284,10 +279,11 @@ def main(args):
                     continue
                 
                 if values[0] == current_values[0]: # same chunk
-                    current_chunk += token # no need to add space
+                    current_chunk += token # whitespace already in token (retain original spacing)
                 
-                else: # new chunk detected, add chunk to dict
-                    clean_chunk = current_chunk.strip().lower()
+                else: # new chunk detected, add current chunk to dict
+                    clean_chunk = clean_entity(entity=current_chunk, choices=choices)
+
                     aggregated_chunk_importance = add_contribution(
                         shap_aggregation_dict=aggregated_chunk_importance,
                         entity_shap_values=current_values,
