@@ -5,10 +5,22 @@ import pickle as pkl
 from tqdm import tqdm
 import numpy as np
 import argparse
+import re
+import collections
+from datasets import load_from_disk
+import spacy
+from spacy.tokenizer import Tokenizer
+
 
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHAP_DIR = os.path.join(PROJECT_DIR, "classification/shap_values/coqa")
+
+dataset = load_from_disk(os.path.join(PROJECT_DIR, "classification/split_datasets/coqa"))['test']
+map = json.load(open(os.path.join(PROJECT_DIR, "maps/idx_uuid_choices_map.json"), "r"))
+
+spacy_pipe = spacy.load('en_core_web_sm', disable=['parser', 'ner'])
+spacy_pipe.tokenizer = Tokenizer(spacy_pipe.vocab, token_match=re.compile(r'\S+').match)
 
 
 
@@ -104,18 +116,91 @@ def average_shap_values(per_class:bool, shap_aggregation_dict):
 
 
 def create_ngrams(tokens, n):
+    ''' Add padding and creat ngrams
+    tokens: list of tokens (strings)
+    n: ngram size
+
+    num of PAD tokens = n-1
+    
+    returns: list of lists of ngrams (strings)
+        [[w1, w2, w3], [w2, w3, w4], ...]]'''
+
+    tokens = ["[BOS]"]*(n-1) + tokens + ["[EOS]"]*(n-1)
     ngrams = zip(*[tokens[i:] for i in range(n)])
-    ngrams = [" ".join(ngram) for ngram in ngrams]
 
     return ngrams
+
+
+
+def clean_entity(entity, choices):
+    ''' Normalize text entity
+    (strip, lower, remove punctuation, lemmatise)
+    
+    entity: text (token | ngram | chunk)
+    '''
+    option_A = choices['A']
+    other_options = f"{choices['B']}|{choices['C']}|{choices['D']}|{choices['E']}"
+    
+    entity = entity.replace("\n", " ").replace("\"", " ")
+    entity = entity.replace("  ", " ").strip(" .,-\n\"")
+
+    placeholder_map = collections.OrderedDict({
+        "[OPT_L]": [
+            # Sub option letters B-E when followed by punct or end of string
+            re.compile(r"\b[B-E]([ .,:)]|\Z)"),
+
+            # Sub A only if followed by punct or by option text (lookahead)
+            re.compile(r"\bA[.,:)]"),
+            re.compile(fr"\bA (?=\s*(?i:{option_A}))"),
+        ],
+        "[OPT_T]": [
+            # Sub option text only if it follow option letter
+            #re.compile(fr"(?<=\[OPT_L\])\s*(?i:({option_A+'|'+other_options}))"),
+
+            # Always sub option text (no lookbehind)
+            re.compile(fr"\b(?i:{option_A+'|'+other_options})([ .,:)]|\Z)"),
+        ],
+        "[NMB]": [
+            # Sub numbers
+            re.compile(r"-?\d+[.,]?\d*[.]?\d*")
+        ]
+    })
+
+    # Replace tokens with placeholders
+    for placeholder, regex in placeholder_map.items():
+        for r in regex:
+            entity = re.sub(r, placeholder, entity)
+    
+    # Ensure space btw placeholders (diff tokens, diff values)
+    entity = entity.replace("][", "] [")
+
+    # Lemmatise
+    # noun, plural | noun, proper plural | verb, 3rd person singular present
+    lemma_tags = {"NNS", "NNPS", "VBZ"}
+    special_tokens = list(placeholder_map.keys()) + ["[BOS]", "[EOS]"]
+
+    if entity in special_tokens:
+        return entity
+
+    spacy_doc = spacy_pipe(entity)
+    entity_out = []
+    for token in spacy_doc:
+        if token.text in special_tokens:
+            entity_out.append(token.text.strip(" .,-\n\""))
+        elif token.tag_ in lemma_tags: # Sub token with its lemma
+            entity_out.append(token.lemma_.strip(" .,-\n\"").lower())
+        else:
+            entity_out.append(token.text.strip(" .,-\n\"").lower())
+
+    return " ".join(entity_out)
 
 
 
 def main(args):
 
     # Load pre-calculated SHAP values
-    with open(os.path.join(SHAP_DIR, "test.pkl"), "rb") as f:
-        shap_values = pkl.load(f) 
+    with open(os.path.join(SHAP_DIR, args.sv_filename), "rb") as f:
+        shap_values = pkl.load(f)
         # shape: (n_samples, n_features (None if n not fixed), n_classes)
 
     aggregated_token_importance = {}
@@ -123,36 +208,43 @@ def main(args):
     aggregated_chunk_importance = {}
 
     for i in tqdm(range(shap_values.shape[0])): # instances
+        if i == 3:
+            import pprint as pp
+            pp.pprint(aggregated_ngram_importance)
+            break
         
-        tokens = shap_values[i].data
-        tokens = [token.strip().lower() for token in tokens]
+        choices = map[str(dataset[i]['pandas_idx'])]['choices']
+        tokens = list(shap_values[i].data)
         values = shap_values[i].values
 
         if args.aggregate_at_ngram_level:
-            ngrams = create_ngrams(tokens, args.n)
-            current_idx = 0
+            ngrams = create_ngrams(tokens, args.n) # adds padding and returns a list of ngrams (strings)
 
+            # Get SHAP values for ngrams
+            # ngram shap values = mean of shap values of its constituent tokens
+            start_idx = 0
             for ngram in ngrams:
-                ngram_tokens = ngram.split()
-                ngram_idxs = []
-                for token in ngram_tokens:
-                    token_idx = tokens.index(token, current_idx, current_idx+args.n)
-                    ngram_idxs.append(token_idx)
-                    
-                current_idx += 1
+                ngram_shap_values = []
+                padded_ngram = False
+
+                for token in ngram:
+                    if token in ["[BOS]", "[EOS]"]:
+                        ngram_shap_values.append(np.array([0.0, 0.0]))
+                        padded_ngram = True
+                        continue
+                    token_idx = tokens.index(token, start_idx)
+                    ngram_shap_values.append(values[token_idx])
                 
-                if ngram.startswith(" "):
-                    ngram_tokens = ["<BOS>"] + ngram_tokens
-                    ngram_idxs = [0] + ngram_idxs
-                    ngram = "<BOS>" + ngram
-                if ngram.endswith(" "):
-                    ngram_tokens = ngram_tokens + ["<EOS>"]
-                    ngram_idxs = ngram_idxs + [len(tokens)-1]
-                    ngram = ngram + "<EOS>"
+                # Only increment start_idx if no pad tokens (they don't have a corresponding idx)
+                if not padded_ngram:
+                    start_idx += 1
                 
-                # get shap values for ngram
-                ngram_shap_values = values[ngram_idxs[0]:ngram_idxs[-1]+1]
+                assert len(ngram_shap_values) == len(ngram)
+
                 ngram_shap_values = np.mean(ngram_shap_values, axis=0) # sum or mean?
+
+                ngram = " ".join(ngram)
+                ngram = clean_entity(entity=ngram, choices=choices).replace("  ", " ")
 
                 aggregated_ngram_importance = add_contribution(
                     shap_aggregation_dict=aggregated_ngram_importance,
@@ -166,7 +258,7 @@ def main(args):
             for j in range(shap_values[i].shape[0]): # tokens
                     
                 token = shap_values.data[i][j]
-                token = token.strip().lower()
+                token = clean_entity(entity=token, choices=choices)
 
                 aggregated_token_importance = add_contribution(
                     shap_aggregation_dict=aggregated_token_importance,
@@ -271,11 +363,12 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
+    parser.add_argument("--sv_filename", type=str, required=True)
     parser.add_argument("--save", action="store_true")
     parser.add_argument("--aggregate_at_token_level", action="store_true")
     parser.add_argument("--aggregate_at_ngram_level", action="store_true")
     parser.add_argument("--aggregate_at_chunk_level", action="store_true")
-    parser.add_argument("--n", type=int, default=2)
+    parser.add_argument("--n", type=int, default=3)
 
     args = parser.parse_args()
     main(args)
