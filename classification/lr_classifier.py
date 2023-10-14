@@ -61,7 +61,6 @@ def load_x_y(features_filename, responses_filename):
 
 
 def manipulate_features(data_df):
-
     # create feature set from pre-calculate sources
     if feature_set_sources:
         feature_set = utils.features.get_feature_set(
@@ -84,36 +83,60 @@ def manipulate_features(data_df):
         )
     )
 
-    if "col" in feature_set_type:
+    if "col" in selection_methods:
         # filter out collinear features
         data_df = utils.features.remove_collinear_features(
             data_df,
             threshold=0.8
         )
 
-    selected_features = []
-    if "rfe" in feature_set_type:
-        selected_features.append(utils.features.recursive_elimination(
-            data_df,
-            model=LogisticRegression(random_state=1, max_iter=1000),
-            n_features = 300
-        ))
+    if ensemble:
+        selected_features = []
+        if "rfe" in selection_methods:
+            selected_features.append(utils.features.recursive_elimination(
+                data_df,
+                model=LogisticRegression(random_state=1, max_iter=1000),
+                n_features = 10
+            ))
     
-    if 'kbest' in feature_set_type:
-        selected_features.append(utils.features.select_k_best(
-            data_df,
-            k = 300
-        ))
+        if 'kbest' in selection_methods:
+            selected_features.append(utils.features.select_k_best(
+                data_df,
+                k = 10
+            ))
 
-    if "rfe" in feature_set_type or "kbest" in feature_set_type:
         final_set = utils.features.ensemble_selection(
             data_df,
             selected_features,
             type='all'
-        )
+            )
+        
         final_set.append('outcome')
         data_df = data_df[final_set]
+    
+    else:
+        for method in selection_methods.split('-'):
+            if method == 'col':
+                continue # this is done regardless
+            if method == 'rfe':
+                rfe_features = utils.features.recursive_elimination(
+                    data_df,
+                    model=LogisticRegression(random_state=1, max_iter=1000),
+                    n_features = 150
+                )
+                tmp_df = data_df.copy()[rfe_features]
+                tmp_df['outcome'] = data_df['outcome']
 
+            elif method == 'kbest':
+                kbest_features = utils.features.select_k_best(
+                    data_df,
+                    k = 300
+                )
+                tmp_df = data_df.copy()[kbest_features]
+                tmp_df['outcome'] = data_df['outcome']
+
+        data_df = tmp_df
+    
     return data_df
 
 
@@ -179,7 +202,7 @@ def save_predictions(y_pred, test_idxs, id):
     
 
 def save_stats(stats):
-    out_filename = f"{id}_{feature_set_type}_{n_instances}"
+    out_filename = f"{id}_{selection_methods}_{feature_types}_{n_instances}"
     out_filepath = os.path.join(STATS_DIR, f"{out_filename}.json")
 
     with open(out_filepath, "w") as f:
@@ -211,10 +234,12 @@ def display_results(y_test, y_pred, show_cm=True):
 
 
 def main(args):
-    global id, feature_set_type, feature_set_sources
+    global id, selection_methods, feature_set_sources, feature_types, ensemble
     id = args.features_filename.split("/")[-1].split("_")[0]
-    feature_set_type = args.feature_set_type
+    selection_methods = args.selection_methods
     feature_set_sources = args.feature_set_sources.split(",") if args.feature_set_sources != "" else None
+    feature_types = args.feature_types
+    ensemble = args.ensemble
 
     ''' Data '''
     data_df = load_x_y(args.features_filename, args.responses_filename)
@@ -238,7 +263,9 @@ def main(args):
     ''' Model stats'''
     model_stats = {
         'model': model.__class__.__name__,
-        'feat_set': feature_set_type,
+        'feat_set': selection_methods,
+        'feat_types': feature_types,
+        'ensemble': ensemble,
         'coefficients': {
             feature: coef for feature, coef 
             in zip(X_train.columns, model.coef_[0])
@@ -270,10 +297,18 @@ if __name__ == "__main__":
     parser.add_argument("--save",
                         action="store_true",
                         help="include --save to save the model, predictions, stats")
-    parser.add_argument("--feature_set_type",
+    parser.add_argument("--selection_methods",
                         default="all",
-                        choices=["all", "col", "col-rfe", "col-kbest", "col-rfe-kbest"],
+                        choices=["all", "col", "col-rfe", "col-kbest", "col-rfe-kbest", "col-kbest-rfe"],
                         help="methods to use for feature selection")
+    parser.add_argument("--ensemble",
+                        action="store_true",
+                        help="include --ensemble to use ensemble selection")
+    parser.add_argument("--feature_types",
+                        type=str,
+                        default="all",
+                        choices=["all", "trad", "arg"],
+                        help="whether the features are from traditional tools or from argadapters, or all")
     parser.add_argument("--feature_set_sources",
                         type=str,
                         default="",
