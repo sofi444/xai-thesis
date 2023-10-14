@@ -42,7 +42,7 @@ label_map = {'False': 0, 'True': 1}
 model_map = {
     'distilbert': 'distilbert-base-uncased',
     'deberta-small': 'microsoft/deberta-v3-small',
-    'deberta-base': 'microsoft/deberta-v3-base',
+    'deberta': 'microsoft/deberta-v3-base',
     'roberta-small': 'roberta-small',
     'roberta': 'roberta-base',
     'bert': 'bert-base-uncased',
@@ -144,8 +144,8 @@ def finetune(args):
 
     data_collator_dynamic_padding = DataCollatorWithPadding(tokenizer, pad_to_multiple_of=8)
 
-    train_batch_size = 32
-    eval_batch_size = 64
+    train_batch_size = 16
+    eval_batch_size = 32
     steps_per_epoch = len(dataset['train']) // train_batch_size
 
     #training_args = TrainingArguments(
@@ -169,7 +169,7 @@ def finetune(args):
         metric_for_best_model='accuracy', # needed for early stopping
         greater_is_better=True, # if metric is loss, set to False
         fp16=True,
-        gradient_accumulation_steps=8, # virtual batch size (gr acc * batch size)
+        gradient_accumulation_steps=4, # virtual batch size (gr acc * batch size)
         seed=seed,
         full_determinism=True
     )
