@@ -195,6 +195,22 @@ def clean_entity(entity, choices):
 
 
 
+def get_frequency_dict():
+
+    # if entity_frequency_test.json exists, load it
+    # else, create it
+    if os.path.exists(os.path.join(SHAP_DIR, "entity_frequency_test.json")):
+        with open(os.path.join(SHAP_DIR, "entity_frequency_test.json"), "r") as f:
+            entity_frequency = json.load(f)
+            if f'{args.n}grams' not in entity_frequency:
+                entity_frequency[f'{args.n}grams'] = {}
+    else:
+        entity_frequency = {'tokens': {}, f'{args.n}grams': {}, 'chunks': {}}  
+    
+    return entity_frequency
+
+
+
 def main(args):
 
     # Load pre-calculated SHAP values
@@ -205,6 +221,9 @@ def main(args):
     aggregated_token_importance = {}
     aggregated_ngram_importance = {}
     aggregated_chunk_importance = {}
+    
+    if args.frequency:
+        entity_frequency = get_frequency_dict()
 
     for i in tqdm(range(shap_values.shape[0])): # instances
 
@@ -247,6 +266,12 @@ def main(args):
                     entity=ngram
                 )
 
+                if args.frequency:
+                    if ngram not in entity_frequency[f'{args.n}grams']:
+                        entity_frequency[f'{args.n}grams'][ngram] = 1
+                    else:
+                        entity_frequency[f'{args.n}grams'][ngram] += 1
+
 
         if args.aggregate_at_token_level:
         
@@ -260,6 +285,11 @@ def main(args):
                     entity_shap_values=shap_values.values[i][j],
                     entity=token
                 )
+                if args.frequency:
+                    if token not in entity_frequency['tokens']:
+                        entity_frequency['tokens'][token] = 1
+                    else:
+                        entity_frequency['tokens'][token] += 1
 
 
         if args.aggregate_at_chunk_level:
@@ -292,6 +322,12 @@ def main(args):
                     # start new chunk
                     current_values = values
                     current_chunk = token
+                    
+                    if args.frequency:
+                        if clean_chunk not in entity_frequency['chunks']:
+                            entity_frequency['chunks'][clean_chunk] = 1
+                        else:
+                            entity_frequency['chunks'][clean_chunk] += 1
 
 
     if args.aggregate_at_ngram_level:
@@ -325,6 +361,7 @@ def main(args):
         )
 
 
+    # save shap values
     if args.save:
         if args.aggregate_at_token_level:
             try:
@@ -354,6 +391,13 @@ def main(args):
                 print("Could not save CHUNK level shap values")
 
 
+    # save frequency dict
+    if args.frequency:
+        out_filename = f"entity_frequency_test_{args.sv_filename.split('_')[1]}.json"
+        with open(os.path.join(SHAP_DIR, out_filename), "w") as f:
+            json.dump(entity_frequency, f)
+
+
 
 
 if __name__ == "__main__":
@@ -365,6 +409,7 @@ if __name__ == "__main__":
     parser.add_argument("--aggregate_at_ngram_level", action="store_true")
     parser.add_argument("--aggregate_at_chunk_level", action="store_true")
     parser.add_argument("--n", type=int, default=3)
+    parser.add_argument("--frequency", action="store_true")
 
     args = parser.parse_args()
     main(args)
