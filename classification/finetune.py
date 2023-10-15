@@ -227,7 +227,7 @@ if __name__ == "__main__":
                         choices=[
                             "distilbert", 
                             "deberta-small", 
-                            "deberta-base", 
+                            "deberta", 
                             "roberta", 
                             "roberta-small", 
                             "bert",
