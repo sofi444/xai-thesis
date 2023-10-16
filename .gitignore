@@ -216,7 +216,8 @@ feature_extraction/ArgQualityAdapters/adapters-venv/*
 classification/models/*
 classification/preds/*
 classification/split_datasets/*
-classification/shap_values/*
+
+classification/shap_values/coqa/masktoken_mask_default/*
 
 # featureExtraction dir
 feature_extraction/featureExtraction/textfiles/*
