@@ -13,17 +13,6 @@ from spacy.tokenizer import Tokenizer
 
 
 
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SHAP_DIR = os.path.join(PROJECT_DIR, "classification/shap_values/coqa")
-
-dataset = load_from_disk(os.path.join(PROJECT_DIR, "classification/split_datasets/coqa"))['test']
-map = json.load(open(os.path.join(PROJECT_DIR, "maps/idx_uuid_choices_map.json"), "r"))
-
-spacy_pipe = spacy.load('en_core_web_sm', disable=['parser', 'ner'])
-spacy_pipe.tokenizer = Tokenizer(spacy_pipe.vocab, token_match=re.compile(r'\S+').match)
-
-
-
 def add_contribution(shap_aggregation_dict, entity_shap_values, entity):
     ''' Aggregate SHAP values
 
@@ -196,27 +185,39 @@ def clean_entity(entity, choices):
 
 
 def get_frequency_dict():
-
-    # if entity_frequency_test.json exists, load it
-    # else, create it
-    if os.path.exists(os.path.join(SHAP_DIR, "entity_frequency_test.json")):
-        with open(os.path.join(SHAP_DIR, "entity_frequency_test.json"), "r") as f:
-            entity_frequency = json.load(f)
-            if f'{args.n}grams' not in entity_frequency:
-                entity_frequency[f'{args.n}grams'] = {}
-    else:
-        entity_frequency = {'tokens': {}, f'{args.n}grams': {}, 'chunks': {}}  
+    ''' Creat or load entity frequency dict
     
-    return entity_frequency
+    if x_entity_frequency_test.json exists, load it
+    (might happen if adding ngrams in different runs)
+    else, create it
+    '''
+    existing_filename = f"{args.sv_from_model}_entity_frequency_{args.sv_from_split}_{mask_used}.json"
+    
+    if "mask" in args.sv_filename:
+        existing_path = os.path.join(SHAP_DIR, "masktoken_mask_default", existing_filename)
+    else:
+        existing_path = os.path.join(SHAP_DIR, existing_filename)
+
+    if os.path.exists(existing_path):
+        with open(existing_path, "r") as f:
+            entity_frequency_dict = json.load(f)
+            if f'{args.n}grams' not in entity_frequency_dict:
+                entity_frequency_dict[f'{args.n}grams'] = {}
+    else:
+        entity_frequency_dict = {'tokens': {}, 'chunks': {}, f'{args.n}grams': {}}
+    
+    return entity_frequency_dict
 
 
 
 def main(args):
-
     # Load pre-calculated SHAP values
     with open(os.path.join(SHAP_DIR, args.sv_filename), "rb") as f:
         shap_values = pkl.load(f)
         # shape: (n_samples, n_features (None if n not fixed), n_classes)
+    
+    global mask_used
+    mask_used = args.sv_filename.split('_')[-1].strip('.pkl')
 
     aggregated_token_importance = {}
     aggregated_ngram_importance = {}
@@ -231,6 +232,7 @@ def main(args):
         tokens = list(shap_values[i].data)
         values = shap_values[i].values
 
+        ######### NGRAM LEVEL #########
         if args.aggregate_at_ngram_level:
             ngrams = create_ngrams(tokens, args.n) # adds padding and returns a list of ngrams (strings)
 
@@ -249,7 +251,7 @@ def main(args):
                     token_idx = tokens.index(token, start_idx)
                     ngram_shap_values.append(values[token_idx])
                 
-                # Only increment start_idx if no pad tokens (they don't have a corresponding idx)
+                # Only increment start_idx if no pad tokens (no corresponding idx)
                 if not padded_ngram:
                     start_idx += 1
                 
@@ -273,6 +275,7 @@ def main(args):
                         entity_frequency[f'{args.n}grams'][ngram] += 1
 
 
+        ######### TOKEN LEVEL #########
         if args.aggregate_at_token_level:
         
             for j in range(shap_values[i].shape[0]): # tokens
@@ -292,6 +295,7 @@ def main(args):
                         entity_frequency['tokens'][token] += 1
 
 
+        ######### CHUNK LEVEL #########
         if args.aggregate_at_chunk_level:
             # text chunk = combination of tokens that have the same shap value
             # chunk's shap values = value of one of the tokens (their are all the same)
@@ -330,6 +334,8 @@ def main(args):
                             entity_frequency['chunks'][clean_chunk] += 1
 
 
+
+    """ AGGREGATE SHAP VALUES FOR ENTITIES + SAVE """
     if args.aggregate_at_ngram_level:
         class_avg_ngram_importance = average_shap_values(
             per_class=True,
@@ -340,6 +346,20 @@ def main(args):
             shap_aggregation_dict=aggregated_ngram_importance
         )
 
+        if args.save:
+            try:
+                with open(os.path.join(
+                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_class-avg_{args.n}grams_{args.sv_from_split}.json"
+                    ), "w") as f:
+                    json.dump(class_avg_ngram_importance, f)
+                with open(os.path.join(
+                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_overall-avg_{args.n}grams_{args.sv_from_split}.json"
+                    ), "w") as f:
+                    json.dump(overall_avg_ngram_importance, f)
+            except:
+                print(f"Could not save {args.n}GRAM level shap values")
+    
+    
     if args.aggregate_at_token_level:
         class_avg_token_importance = average_shap_values(
             per_class=True,
@@ -349,6 +369,20 @@ def main(args):
             per_class=False,
             shap_aggregation_dict=aggregated_token_importance
         )
+
+        if args.save:
+            try:
+                with open(os.path.join(
+                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_class-avg_token_{args.sv_from_split}.json"
+                    ), "w") as f:
+                    json.dump(class_avg_token_importance, f)
+                with open(os.path.join(
+                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_overall-avg_token_{args.sv_from_split}.json"
+                    ), "w") as f:
+                    json.dump(overall_avg_token_importance, f)
+            except:
+                print("Could not save TOKEN level shap values")
+
 
     if args.aggregate_at_chunk_level:
         class_avg_chunk_importance = average_shap_values(
@@ -360,40 +394,24 @@ def main(args):
             shap_aggregation_dict=aggregated_chunk_importance
         )
 
-
-    # save shap values
-    if args.save:
-        if args.aggregate_at_token_level:
+        if args.save:
             try:
-                with open(os.path.join(SHAP_DIR, "class-avg_token_importance_test.json"), "w") as f:
-                    json.dump(class_avg_token_importance, f)
-                with open(os.path.join(SHAP_DIR, "overall-avg_token_importance_test.json"), "w") as f:
-                    json.dump(overall_avg_token_importance, f)
-            except:
-                print("Could not save TOKEN level shap values")
-        
-        if args.aggregate_at_ngram_level:
-            try:
-                with open(os.path.join(SHAP_DIR, f"class-avg_{args.n}gram_importance_test.json"), "w") as f:
-                    json.dump(class_avg_ngram_importance, f)
-                with open(os.path.join(SHAP_DIR, f"overall-avg_{args.n}gram_importance_test.json"), "w") as f:
-                    json.dump(overall_avg_ngram_importance, f)
-            except:
-                print(f"Could not save NGRAM ({args.n}gram) level shap values")
-        
-        if args.aggregate_at_chunk_level:
-            try:
-                with open(os.path.join(SHAP_DIR, "class-avg_chunk_importance_test.json"), "w") as f:
+                with open(os.path.join(
+                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_class-avg_chunk_{args.sv_from_split}.json"
+                    ), "w") as f:
                     json.dump(class_avg_chunk_importance, f)
-                with open(os.path.join(SHAP_DIR, "overall-avg_chunk_importance_test.json"), "w") as f:
+                with open(os.path.join(
+                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_overall-avg_chunk_{args.sv_from_split}.json"
+                    ), "w") as f:
                     json.dump(overall_avg_chunk_importance, f)
             except:
                 print("Could not save CHUNK level shap values")
 
 
-    # save frequency dict
+
+    """ SAVE ENTITY FREQUENCY DICT """
     if args.frequency:
-        out_filename = f"entity_frequency_test_{args.sv_filename.split('_')[1]}.json"
+        out_filename = f"{args.sv_from_model}_entity_frequency_{args.sv_from_split}_{mask_used}.json"
         with open(os.path.join(SHAP_DIR, out_filename), "w") as f:
             json.dump(entity_frequency, f)
 
@@ -404,12 +422,29 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--sv_filename", type=str, required=True)
+    parser.add_argument("--sv_from_model", type=str, required=True,
+                        choices=["roberta", "bert", "distilbert", "deberta", "bert-large"])
     parser.add_argument("--save", action="store_true")
     parser.add_argument("--aggregate_at_token_level", action="store_true")
     parser.add_argument("--aggregate_at_ngram_level", action="store_true")
     parser.add_argument("--aggregate_at_chunk_level", action="store_true")
     parser.add_argument("--n", type=int, default=3)
     parser.add_argument("--frequency", action="store_true")
+    parser.add_argument("--sv_from_split", type=str, default="test",
+                        choices=["train", "test"])
 
     args = parser.parse_args()
+
+    PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    SHAP_DIR = os.path.join(PROJECT_DIR, "classification/shap_values/coqa")
+
+    dataset = load_from_disk(
+        os.path.join(PROJECT_DIR, "classification/split_datasets/coqa")
+        )[args.sv_from_split]
+    # ! map is only for test set atm
+    map = json.load(open(os.path.join(PROJECT_DIR, "maps/idx_uuid_choices_map.json"), "r"))
+
+    spacy_pipe = spacy.load('en_core_web_sm', disable=['parser', 'ner'])
+    spacy_pipe.tokenizer = Tokenizer(spacy_pipe.vocab, token_match=re.compile(r'\S+').match)
+    
     main(args)
