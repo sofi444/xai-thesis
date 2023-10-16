@@ -82,7 +82,7 @@ def main(args):
             dataset[args.split]['text'] # list of strings
         ) # returns a shap explanation object
 
-        filename = f"{args.model}_{args.split}_{'empty' if mask=='' else 'mask'}_.pkl"
+        filename = f"sv_{args.model}_{args.split}_{'empty' if mask=='' else 'mask'}.pkl"
 
         try:
             assert len(shap_values) == len(dataset[args.split]['text'])
