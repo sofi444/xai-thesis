@@ -1,5 +1,16 @@
 """
-3rd condition does not work. Change method for cheking grammatical correctness.
+CommonsenseQA has some issues:
+- sometimes two or more options are the same
+- sometimes two or more options are semantically similar (get in line, get in queue)
+- sometimes the question is not grammatically correct
+- some questions just don't make much sense (low data quality)
+
+This script filters the CommonsenseQA dataset based on the following conditions:
+1. All choices are unique
+2. All choices are semantically different (based on threshold)
+3. All questions are grammatically correct (based on perplexity threshold)
+    - the 3rd condition is commented out because it is not working as expected
+        Perplexity score does not reflect well the grammaticality of a sentence
 """
 
 import json
@@ -117,7 +128,7 @@ def save_filtered_data(filtered_data, data_split_to_filter):
 
 if __name__ == "__main__":
 
-    PROJECT_DIR = os.path.dirname(os.path.abspath(__file__)) # xai_sofia_casadei_master_thesis
+    PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # xai_sofia_casadei_master_thesis
     DATA_DIR = os.path.join(PROJECT_DIR, 'data/') # xai_sofia_casadei_master_thesis/data/
     DATASET_DIR = os.path.join(DATA_DIR, 'commonsenseQA')
 
