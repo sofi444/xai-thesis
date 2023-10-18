@@ -3,6 +3,9 @@ import json
 import pandas as pd
 import datetime as dt
 import numpy as np
+import datetime as dt
+import joblib
+import argparse
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -13,10 +16,6 @@ from sklearn.metrics import (
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 
-import joblib
-
-import argparse
-
 import sys
 sys.path.append("/Users/q616967/Workspace/thesis/uni/xai-thesis/")
 sys.path.append("/mount/studenten-temp1/users/dpgo/xai-thesis/")
@@ -26,7 +25,9 @@ import utils.features
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from datasets import load_from_disk
 
+print("Done importing")
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FEATURES_DIR = os.path.join(PROJECT_DIR, "feature_extraction/featureExtraction/output/")
@@ -34,6 +35,7 @@ RESPONSES_DIR = os.path.join(PROJECT_DIR, "responses/")
 MODELS_DIR = os.path.join(PROJECT_DIR, "classification/models/")
 PREDS_DIR = os.path.join(PROJECT_DIR, "classification/preds/")
 STATS_DIR = os.path.join(PROJECT_DIR, "classification/stats/")
+SPLITS_DIR = os.path.join(PROJECT_DIR, "classification/split_datasets/coqa")
 
 
 
@@ -48,8 +50,8 @@ def load_x_y(features_filename, responses_filename):
     # merge
     data_df = utils.features.merge_and_filter(features_df, labels_df)
 
-    # convert labels from 'False'/'True' to 0/1
-    #data_df['outcome'] = data_df['outcome'].astype(int)
+    # for testing: 15 rows, 15 columns
+    #data_df = data_df.iloc[-15:, -15:] # tmp
 
     # normalize + select features
     data_df = manipulate_features(data_df)
@@ -115,14 +117,14 @@ def manipulate_features(data_df):
         data_df = data_df[final_set]
     
     else:
-        for method in selection_methods.split('-'):
+        for idx, method in enumerate(selection_methods.split('-')):
             if method == 'col':
-                continue # this is done regardless
+                continue # idx == 0; this is done regardless
             if method == 'rfe':
                 rfe_features = utils.features.recursive_elimination(
                     data_df,
                     model=LogisticRegression(random_state=1, max_iter=1000),
-                    n_features = 150
+                    n_features = 300 if idx==1 else 150
                 )
                 tmp_df = data_df.copy()[rfe_features]
                 tmp_df['outcome'] = data_df['outcome']
@@ -130,7 +132,7 @@ def manipulate_features(data_df):
             elif method == 'kbest':
                 kbest_features = utils.features.select_k_best(
                     data_df,
-                    k = 300
+                    k = 300 if idx==1 else 150
                 )
                 tmp_df = data_df.copy()[kbest_features]
                 tmp_df['outcome'] = data_df['outcome']
@@ -142,10 +144,21 @@ def manipulate_features(data_df):
 
 
 def prepare_splits(data_df, test_size=0.2, random_state=1):
-    # split into train and test
-    train_df, test_df = train_test_split(data_df, 
-                                         test_size=test_size,
-                                         random_state=random_state)
+
+    if existing_splits: 
+        # use exact same split as in the SPLITS_DIR
+        raw_dataset = load_from_disk(SPLITS_DIR)
+        # eg. train_df contains instances in raw_dataset['train']
+        # based on the pandas_idx in raw_dataset['train']['pandas_idx']
+        train_df = data_df[data_df.index.isin(raw_dataset['train']['pandas_idx'])]
+        test_df = data_df[data_df.index.isin(raw_dataset['test']['pandas_idx'])]
+    else:
+        # split into train and test
+        train_df, test_df = train_test_split(
+            data_df, 
+            test_size=test_size, 
+            random_state=random_state
+        )
 
     X_train = train_df.drop(columns=['outcome'])
     y_train = train_df['outcome']
@@ -185,14 +198,14 @@ def train(X_train, y_train):
 
 
 
-def save_model(model, id):
-    filepath = os.path.join(MODELS_DIR, f"model_{id}.joblib")
+def save_model(model):
+    filepath = os.path.join(MODELS_DIR, f"model_{id}_{run_id}.joblib")
     joblib.dump(model, filepath)
 
 
 
-def save_predictions(y_pred, test_idxs, id):
-    preds_filepath = os.path.join(PREDS_DIR, f"preds_{id}.json")
+def save_predictions(y_pred, test_idxs):
+    preds_filepath = os.path.join(PREDS_DIR, f"preds_{id}_{run_id}.json")
     with open(preds_filepath, "w") as f:
         json.dump(
             {idx:pred for idx, pred in zip(test_idxs, y_pred.tolist())}, 
@@ -202,7 +215,7 @@ def save_predictions(y_pred, test_idxs, id):
     
 
 def save_stats(stats):
-    out_filename = f"{id}_{selection_methods}_{feature_types}_{n_instances}"
+    out_filename = f"{id}_{run_id}_{selection_methods}_{feature_types}_{n_instances}"
     out_filepath = os.path.join(STATS_DIR, f"{out_filename}.json")
 
     with open(out_filepath, "w") as f:
@@ -234,8 +247,13 @@ def display_results(y_test, y_pred, show_cm=True):
 
 
 def main(args):
-    global id, selection_methods, feature_set_sources, feature_types, ensemble
+
+    global id, run_id, existing_splits
     id = args.features_filename.split("/")[-1].split("_")[0]
+    run_id = dt.datetime.now().strftime("%H%M")
+    existing_splits = args.existing_splits
+
+    global feature_set_sources, selection_methods, feature_types, ensemble
     selection_methods = args.selection_methods
     feature_set_sources = args.feature_set_sources.split(",") if args.feature_set_sources != "" else None
     feature_types = args.feature_types
@@ -276,10 +294,10 @@ def main(args):
     
     ''' Save model, predictions, stats '''
     if args.save:
-        #save_model(model, id)
-        #save_predictions(y_pred, test_idxs, id)
+        save_model(model)
+        save_predictions(y_pred, test_idxs)
         save_stats(model_stats)
-        print(f"\nSaved model, predictions and stats with id: {id}")
+        print(f"\nSaved model, predictions and stats with id: {id}_{run_id}")
 
 
 
@@ -313,8 +331,12 @@ if __name__ == "__main__":
                         type=str,
                         default="",
                         help="sources (filenames, comma delimited str) for feature selection (json in stats/)")
+    parser.add_argument("--existing_splits",
+                        action="store_true",
+                        help="include --existing_splits to use existing splits as for transformers models")
     
     args = parser.parse_args()
+    print(args)
     main(args)
 
 
