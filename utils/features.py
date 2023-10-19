@@ -8,19 +8,18 @@ from tqdm import tqdm
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import f_classif
+from sklearn.feature_selection import f_classif, chi2
 from sklearn.feature_selection import SequentialFeatureSelector
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LogisticRegression
 
 
+
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FEATURES_DIR = os.path.join(PROJECT_DIR, "feature_extraction/featureExtraction/output/")
+FEATURES_DIR = os.path.join(PROJECT_DIR, "feature_extraction/features/")
 RESPONSES_DIR = os.path.join(PROJECT_DIR, "responses/")
 STATS_DIR = os.path.join(PROJECT_DIR, "classification/stats/")
 
-features_filepath = "feature_extraction/featureExtraction/output/04091703_features.csv"
-responses_filepath = "responses/04091703_parsed_turbo_2000train_clean_eval.jsonl"
 
 
 def load_features(features_file):
@@ -28,7 +27,7 @@ def load_features(features_file):
     Load features from .csv file
     Return a pandas dataframe
     '''
-    if os.path.isfile(features_file):
+    if os.path.exists(features_file):
         filepath = features_file
     else:
         filepath = os.path.join(FEATURES_DIR, features_file)
@@ -46,7 +45,7 @@ def load_labels(responses_file):
     Load evaluated responses (i.e., with predicted labels/outcomes)
     Return map between ids and labels as pandas dataframe
     '''
-    if os.path.isfile(responses_file):
+    if os.path.exists(responses_file):
         filepath = responses_file
     else:
         filepath = os.path.join(RESPONSES_DIR, responses_file)
@@ -70,9 +69,10 @@ def get_feature_set(source_filenames:list):
     
     feature_set = set()
     for source in source_filenames:
-        if "/" in source:
-            source = source.split("/")[-1]
-        path = os.path.join(STATS_DIR, source)
+        if os.path.exists(source):
+            path = source
+        else:
+            path = os.path.join(STATS_DIR, source)
         
         with open(path, "r") as f:
             stats = json.load(f)
@@ -139,9 +139,10 @@ def select_k_best(data_df, k=50):
     Select k best features according to statistical tests
     Returns names of selected features as array
     '''
-    print("Running SelectKBest...")
+    print("\nRunning SelectKBest...")
 
-    selector = SelectKBest(f_classif, k=k)
+    #selector = SelectKBest(f_classif, k=k)
+    selector = SelectKBest(chi2, k=k)
     selector.fit(
         X = data_df.drop(columns=["outcome"]), 
         y = data_df["outcome"]
@@ -150,7 +151,7 @@ def select_k_best(data_df, k=50):
     idx_selected_features = selector.get_support(indices=True)
     selected_features = data_df.drop(columns=["outcome"]).columns[idx_selected_features]
     
-    print(f"Done! # selected features: {len(selected_features)}")
+    print(f"\tDone! # selected features: {len(selected_features)}")
     return selected_features
 
 
@@ -164,7 +165,8 @@ def remove_collinear_features(features_df, threshold, target_name='outcome'):
     threshold: correlation threshold above which to remove features
     target_name: name of the target column
     '''
-    print("Removing collinear features...")
+    print("\nRemoving collinear features...")
+    print("\tCalculating correlation matrix (it may take a while)")
 
     corr_matrix = features_df.corr().abs()
     to_drop = []
@@ -176,7 +178,7 @@ def remove_collinear_features(features_df, threshold, target_name='outcome'):
             lambda x: x.corr(features_df[target_name])
             )
 
-    print("Iterating through all pairs of features...")
+    print("\tIterating through all pairs of features")
     feature_pairs = list(itertools.combinations(corr_matrix.columns, 2))
     
     for feature1, feature2 in tqdm(feature_pairs):
@@ -195,7 +197,7 @@ def remove_collinear_features(features_df, threshold, target_name='outcome'):
     # Drop marked features from the dataframe
     features_df.drop(columns=to_drop, inplace=True)
 
-    print(f"Done! Number of selected features: {len(features_df.columns)}")
+    print(f"\tDone! Number of selected features: {len(features_df.columns)}")
     
     return features_df
 
@@ -211,7 +213,7 @@ def sequential_selection(data_df, model, **kwargs):
     if 'auto', and tol is None (default), the number of features to select is half the number of features.
     if tol is float, then features are selected while the score change does not exceed tol
     '''
-    print(f"Running {kwargs['direction']} Sequential Selection...")
+    print(f"\nRunning {kwargs['direction']} Sequential Selection...")
 
     sfs = SequentialFeatureSelector(model,
                                     tol=kwargs['max_score_change'],
@@ -224,7 +226,7 @@ def sequential_selection(data_df, model, **kwargs):
     sfs.fit(data_df.drop(columns=["outcome"]), data_df["outcome"])
     selected_features = sfs.get_feature_names_out() # array
     
-    print(f"Done! # selected features: {len(selected_features)}")
+    print(f"\tDone! Number of selected features: {len(selected_features)}")
     return selected_features
     
 
@@ -241,16 +243,16 @@ def recursive_elimination(data_df, model, **kwargs):
         If float between 0 and 1, it is the fraction of features to select.   
     step: features to remove at each iteration. Default is 1.
     '''
-    print(f"Running Recursive Feature Elimination...")
+    print(f"\nRunning Recursive Feature Elimination...")
     RFE_selector = RFE(estimator=model,
                        n_features_to_select=kwargs['n_features'],
-                       step=1,
-                       verbose=0)
+                       step=3,
+                       verbose=1)
     RFE_selector.fit(data_df.drop(columns=["outcome"]), data_df["outcome"])
 
     selected_features = RFE_selector.get_feature_names_out() # array
     
-    print(f"Done! # selected features {len(selected_features)}")
+    print(f"\tDone! # selected features {len(selected_features)}")
     return selected_features
 
 
@@ -262,7 +264,7 @@ def ensemble_selection(data_df, selected_features_by_methods, type="all"):
 
     selected_features_by_methods: list of lists of selected features
     '''
-    print(f"Ensembling features...")
+    print(f"\nEnsembling features...")
     feature_counts = {}
     for features in selected_features_by_methods:
         for feature in features:
@@ -288,7 +290,7 @@ def ensemble_selection(data_df, selected_features_by_methods, type="all"):
             feature for feature, count in feature_counts.items() if count >= 1
         ]
     
-    print(f"Done! # selected features: {len(selected_features)}")
+    print(f"\tDone! # selected features: {len(selected_features)}")
     return selected_features
 
 
@@ -299,7 +301,9 @@ def ensemble_selection(data_df, selected_features_by_methods, type="all"):
 
 
 if __name__ == "__main__":
-    
+    features_filepath = "feature_extraction/features/04091703_features.csv.gz"
+    responses_filepath = "responses/04091703_parsed_turbo_2000train_clean_eval.jsonl"
+
     map = {
         "collinear": {"function":remove_collinear_features,
                       "kwargs": {"threshold": 0.8}},
