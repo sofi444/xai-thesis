@@ -2,9 +2,10 @@
   "transformerxlr": {
     "distilbertxlr_all-col-rfe": {
       "cohens_kappa": 0.468,
-      "accuracy": 0.794,
       "agreement": 794,
       "disagreement": 206,
+      "accuracy_1": 0.804,
+      "accuracy_2": 0.722,
       "instances_with_agreement": [
         4343,
         1794,
@@ -1012,9 +1013,10 @@
     },
     "distilbertxlr_all-rfe": {
       "cohens_kappa": 0.471,
-      "accuracy": 0.785,
       "agreement": 785,
       "disagreement": 215,
+      "accuracy_1": 0.804,
+      "accuracy_2": 0.719,
       "instances_with_agreement": [
         4343,
         1794,
@@ -2022,9 +2024,10 @@
     },
     "distilbertxlr_all_kbest-rfe": {
       "cohens_kappa": 0.415,
-      "accuracy": 0.767,
       "agreement": 767,
       "disagreement": 233,
+      "accuracy_1": 0.804,
+      "accuracy_2": 0.695,
       "instances_with_agreement": [
         4343,
         1794,
@@ -3032,9 +3035,10 @@
     },
     "bertxlr_all-col-rfe": {
       "cohens_kappa": 0.429,
-      "accuracy": 0.782,
       "agreement": 782,
       "disagreement": 218,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.722,
       "instances_with_agreement": [
         4343,
         1794,
@@ -4042,9 +4046,10 @@
     },
     "bertxlr_all-rfe": {
       "cohens_kappa": 0.435,
-      "accuracy": 0.773,
       "agreement": 773,
       "disagreement": 227,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.719,
       "instances_with_agreement": [
         4343,
         1794,
@@ -5052,9 +5057,10 @@
     },
     "bertxlr_all_kbest-rfe": {
       "cohens_kappa": 0.382,
-      "accuracy": 0.757,
       "agreement": 757,
       "disagreement": 243,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.695,
       "instances_with_agreement": [
         4343,
         1794,
@@ -6062,9 +6068,10 @@
     },
     "bert-largexlr_all-col-rfe": {
       "cohens_kappa": 0.435,
-      "accuracy": 0.786,
       "agreement": 786,
       "disagreement": 214,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.722,
       "instances_with_agreement": [
         4343,
         1794,
@@ -7072,9 +7079,10 @@
     },
     "bert-largexlr_all-rfe": {
       "cohens_kappa": 0.436,
-      "accuracy": 0.775,
       "agreement": 775,
       "disagreement": 225,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.719,
       "instances_with_agreement": [
         4343,
         1794,
@@ -8082,9 +8090,10 @@
     },
     "bert-largexlr_all_kbest-rfe": {
       "cohens_kappa": 0.377,
-      "accuracy": 0.757,
       "agreement": 757,
       "disagreement": 243,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.695,
       "instances_with_agreement": [
         4343,
         1794,
@@ -9092,9 +9101,10 @@
     },
     "robertaxlr_all-col-rfe": {
       "cohens_kappa": 0.426,
-      "accuracy": 0.777,
       "agreement": 777,
       "disagreement": 223,
+      "accuracy_1": 0.813,
+      "accuracy_2": 0.722,
       "instances_with_agreement": [
         4343,
         1794,
@@ -10102,9 +10112,10 @@
     },
     "robertaxlr_all-rfe": {
       "cohens_kappa": 0.44,
-      "accuracy": 0.772,
       "agreement": 772,
       "disagreement": 228,
+      "accuracy_1": 0.813,
+      "accuracy_2": 0.719,
       "instances_with_agreement": [
         4343,
         1794,
@@ -11112,9 +11123,10 @@
     },
     "robertaxlr_all_kbest-rfe": {
       "cohens_kappa": 0.379,
-      "accuracy": 0.752,
       "agreement": 752,
       "disagreement": 248,
+      "accuracy_1": 0.813,
+      "accuracy_2": 0.695,
       "instances_with_agreement": [
         4343,
         1794,
@@ -12122,9 +12134,10 @@
     },
     "debertaxlr_all-col-rfe": {
       "cohens_kappa": 0.453,
-      "accuracy": 0.788,
       "agreement": 788,
       "disagreement": 212,
+      "accuracy_1": 0.81,
+      "accuracy_2": 0.722,
       "instances_with_agreement": [
         4343,
         1794,
@@ -13132,9 +13145,10 @@
     },
     "debertaxlr_all-rfe": {
       "cohens_kappa": 0.456,
-      "accuracy": 0.779,
       "agreement": 779,
       "disagreement": 221,
+      "accuracy_1": 0.81,
+      "accuracy_2": 0.719,
       "instances_with_agreement": [
         4343,
         1794,
@@ -14142,9 +14156,10 @@
     },
     "debertaxlr_all_kbest-rfe": {
       "cohens_kappa": 0.395,
-      "accuracy": 0.759,
       "agreement": 759,
       "disagreement": 241,
+      "accuracy_1": 0.81,
+      "accuracy_2": 0.695,
       "instances_with_agreement": [
         4343,
         1794,
@@ -15152,9 +15167,10 @@
     },
     "distilbertxlr_arg": {
       "cohens_kappa": 0.248,
-      "accuracy": 0.744,
       "agreement": 744,
       "disagreement": 256,
+      "accuracy_1": 0.804,
+      "accuracy_2": 0.63,
       "instances_with_agreement": [
         4343,
         1794,
@@ -16162,9 +16178,10 @@
     },
     "bertxlr_arg": {
       "cohens_kappa": 0.219,
-      "accuracy": 0.74,
       "agreement": 740,
       "disagreement": 260,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.63,
       "instances_with_agreement": [
         4343,
         1794,
@@ -17172,9 +17189,10 @@
     },
     "bert-largexlr_arg": {
       "cohens_kappa": 0.213,
-      "accuracy": 0.742,
       "agreement": 742,
       "disagreement": 258,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.63,
       "instances_with_agreement": [
         4343,
         1794,
@@ -18182,9 +18200,10 @@
     },
     "robertaxlr_arg": {
       "cohens_kappa": 0.202,
-      "accuracy": 0.727,
       "agreement": 727,
       "disagreement": 273,
+      "accuracy_1": 0.813,
+      "accuracy_2": 0.63,
       "instances_with_agreement": [
         4343,
         1794,
@@ -19192,9 +19211,10 @@
     },
     "debertaxlr_arg": {
       "cohens_kappa": 0.236,
-      "accuracy": 0.74,
       "agreement": 740,
       "disagreement": 260,
+      "accuracy_1": 0.81,
+      "accuracy_2": 0.63,
       "instances_with_agreement": [
         4343,
         1794,
@@ -20204,9 +20224,10 @@
   "transformerxtransformer": {
     "distilbertxbert": {
       "cohens_kappa": 0.89,
-      "accuracy": 0.96,
       "agreement": 960,
       "disagreement": 40,
+      "accuracy_1": 0.804,
+      "accuracy_2": 0.814,
       "instances_with_agreement": [
         4343,
         1794,
@@ -21214,9 +21235,10 @@
     },
     "distilbertxbert-large": {
       "cohens_kappa": 0.9,
-      "accuracy": 0.964,
       "agreement": 964,
       "disagreement": 36,
+      "accuracy_1": 0.804,
+      "accuracy_2": 0.814,
       "instances_with_agreement": [
         4343,
         1794,
@@ -22224,9 +22246,10 @@
     },
     "distilbertxroberta": {
       "cohens_kappa": 0.868,
-      "accuracy": 0.951,
       "agreement": 951,
       "disagreement": 49,
+      "accuracy_1": 0.804,
+      "accuracy_2": 0.813,
       "instances_with_agreement": [
         4343,
         1794,
@@ -23234,9 +23257,10 @@
     },
     "distilbertxdeberta": {
       "cohens_kappa": 0.881,
-      "accuracy": 0.956,
       "agreement": 956,
       "disagreement": 44,
+      "accuracy_1": 0.804,
+      "accuracy_2": 0.81,
       "instances_with_agreement": [
         4343,
         1794,
@@ -24244,9 +24268,10 @@
     },
     "bertxbert-large": {
       "cohens_kappa": 0.955,
-      "accuracy": 0.984,
       "agreement": 984,
       "disagreement": 16,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.814,
       "instances_with_agreement": [
         4343,
         1794,
@@ -25254,9 +25279,10 @@
     },
     "bertxroberta": {
       "cohens_kappa": 0.931,
-      "accuracy": 0.975,
       "agreement": 975,
       "disagreement": 25,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.813,
       "instances_with_agreement": [
         4343,
         1794,
@@ -26264,9 +26290,10 @@
     },
     "bertxdeberta": {
       "cohens_kappa": 0.939,
-      "accuracy": 0.978,
       "agreement": 978,
       "disagreement": 22,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.81,
       "instances_with_agreement": [
         4343,
         1794,
@@ -27274,9 +27301,10 @@
     },
     "bert-largexroberta": {
       "cohens_kappa": 0.931,
-      "accuracy": 0.975,
       "agreement": 975,
       "disagreement": 25,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.813,
       "instances_with_agreement": [
         4343,
         1794,
@@ -28284,9 +28312,10 @@
     },
     "bert-largexdeberta": {
       "cohens_kappa": 0.933,
-      "accuracy": 0.976,
       "agreement": 976,
       "disagreement": 24,
+      "accuracy_1": 0.814,
+      "accuracy_2": 0.81,
       "instances_with_agreement": [
         4343,
         1794,
@@ -29294,9 +29323,10 @@
     },
     "robertaxdeberta": {
       "cohens_kappa": 0.933,
-      "accuracy": 0.975,
       "agreement": 975,
       "disagreement": 25,
+      "accuracy_1": 0.813,
+      "accuracy_2": 0.81,
       "instances_with_agreement": [
         4343,
         1794,
@@ -30306,9 +30336,10 @@
   "lrxlr": {
     "lr_all-col-rfexlr_all-rfe": {
       "cohens_kappa": 0.735,
-      "accuracy": 0.889,
       "agreement": 889,
       "disagreement": 111,
+      "accuracy_1": 0.722,
+      "accuracy_2": 0.719,
       "instances_with_agreement": [
         4343,
         1794,
@@ -31316,9 +31347,10 @@
     },
     "lr_all-col-rfexlr_all_kbest-rfe": {
       "cohens_kappa": 0.682,
-      "accuracy": 0.869,
       "agreement": 869,
       "disagreement": 131,
+      "accuracy_1": 0.722,
+      "accuracy_2": 0.695,
       "instances_with_agreement": [
         4343,
         1794,
@@ -32326,9 +32358,10 @@
     },
     "lr_all-rfexlr_all_kbest-rfe": {
       "cohens_kappa": 0.719,
-      "accuracy": 0.88,
       "agreement": 880,
       "disagreement": 120,
+      "accuracy_1": 0.719,
+      "accuracy_2": 0.695,
       "instances_with_agreement": [
         4343,
         1794,
@@ -33336,9 +33369,10 @@
     },
     "lr_all-col-rfexlr_arg": {
       "cohens_kappa": 0.377,
-      "accuracy": 0.774,
       "agreement": 774,
       "disagreement": 226,
+      "accuracy_1": 0.722,
+      "accuracy_2": 0.63,
       "instances_with_agreement": [
         4343,
         1794,
@@ -34346,9 +34380,10 @@
     },
     "lr_all-rfexlr_arg": {
       "cohens_kappa": 0.334,
-      "accuracy": 0.743,
       "agreement": 743,
       "disagreement": 257,
+      "accuracy_1": 0.719,
+      "accuracy_2": 0.63,
       "instances_with_agreement": [
         4343,
         1794,
@@ -35356,9 +35391,10 @@
     },
     "lr_all_kbest-rfexlr_arg": {
       "cohens_kappa": 0.364,
-      "accuracy": 0.761,
       "agreement": 761,
       "disagreement": 239,
+      "accuracy_1": 0.695,
+      "accuracy_2": 0.63,
       "instances_with_agreement": [
         4343,
         1794,
