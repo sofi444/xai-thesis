@@ -1,0 +1,53 @@
+{
+    "model": "LogisticRegression",
+    "args": {
+        "features_filename": "12091031_arg_features_allscores.csv.gz",
+        "responses_filename": "responses/12091031_parsed_turbo_10000_eval.jsonl",
+        "save": true,
+        "selection_methods": "kbest-rfe",
+        "ensemble": true,
+        "feature_types": "arg",
+        "feature_set_sources": "",
+        "existing_splits": true,
+        "balance": false
+    },
+    "coefficients": {
+        "reasonableness": 1.054392496011822,
+        "effectiveness": -1.08442347705056,
+        "impact_0": 0.4506313643660148,
+        "impact_1": -0.26862756323255865,
+        "quality": -1.3130684661500354,
+        "justification_2": 0.429041088916804,
+        "interactivity_0": -1.1028055010570665,
+        "interactivity_2": 0.5587113354758965,
+        "cogency": -1.9766663578780599
+    },
+    "intercept": 2.2096724831596535,
+    "scores": {
+        "False": {
+            "precision": 0.5254237288135594,
+            "recall": 0.24603174603174602,
+            "f1-score": 0.33513513513513515,
+            "support": 378.0
+        },
+        "True": {
+            "precision": 0.6537059538274606,
+            "recall": 0.864951768488746,
+            "f1-score": 0.744636678200692,
+            "support": 622.0
+        },
+        "accuracy": 0.631,
+        "macro avg": {
+            "precision": 0.5895648413205099,
+            "recall": 0.555491757260246,
+            "f1-score": 0.5398859066679136,
+            "support": 1000.0
+        },
+        "weighted avg": {
+            "precision": 0.6052152727722059,
+            "recall": 0.631,
+            "f1-score": 0.5898450949219115,
+            "support": 1000.0
+        }
+    }
+}
