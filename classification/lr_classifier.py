@@ -1,11 +1,14 @@
+print('Starting...')
+
 import os
 import json
+import joblib
+import argparse
 import pandas as pd
 import datetime as dt
 import numpy as np
 import datetime as dt
-import joblib
-import argparse
+import pprint as pp
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -27,7 +30,9 @@ import seaborn as sns
 
 from datasets import load_from_disk
 
-print("Done importing")
+
+print('Done importing')
+
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FEATURES_DIR = os.path.join(PROJECT_DIR, "feature_extraction/featureExtraction/output/")
@@ -49,6 +54,14 @@ def load_x_y(features_filename, responses_filename):
 
     # merge
     data_df = utils.features.merge_and_filter(features_df, labels_df)
+
+    # balance (false is the minority class)
+    if args.balance:
+        n_false = len(data_df[data_df['outcome']==False])
+        data_df = pd.concat([
+            data_df[data_df['outcome']==False],
+            data_df[data_df['outcome']==True].sample(n=n_false, random_state=1)
+        ])
 
     # for testing: 15 rows, 15 columns
     #data_df = data_df.iloc[-15:, -15:] # tmp
@@ -85,12 +98,19 @@ def manipulate_features(data_df):
         )
     )
 
+    nf = len(data_df.columns)-1
+    print(f"\nNumber of features before selection: {nf}")
+    
+    tracker = 0
     if "col" in selection_methods:
         # filter out collinear features
         data_df = utils.features.remove_collinear_features(
             data_df,
-            threshold=0.8
+            threshold=0.9
         )
+        nf = len(data_df.columns)-1
+    else:
+        tracker = 1
 
     if ensemble:
         selected_features = []
@@ -98,13 +118,13 @@ def manipulate_features(data_df):
             selected_features.append(utils.features.recursive_elimination(
                 data_df,
                 model=LogisticRegression(random_state=1, max_iter=1000),
-                n_features = 10
+                n_features = 50*nf//100
             ))
     
         if 'kbest' in selection_methods:
             selected_features.append(utils.features.select_k_best(
                 data_df,
-                k = 10
+                k = 50*nf//100
             ))
 
         final_set = utils.features.ensemble_selection(
@@ -115,29 +135,36 @@ def manipulate_features(data_df):
         
         final_set.append('outcome')
         data_df = data_df[final_set]
+        print(f"\nNumber of features after ensemble selection: {len(data_df.columns)-1}")
     
-    else:
-        for idx, method in enumerate(selection_methods.split('-')):
+    else: # sequential
+        for method in selection_methods.split('-'):
             if method == 'col':
-                continue # idx == 0; this is done regardless
+                continue # already done
             if method == 'rfe':
                 rfe_features = utils.features.recursive_elimination(
                     data_df,
                     model=LogisticRegression(random_state=1, max_iter=1000),
-                    n_features = 300 if idx==1 else 150
+                    n_features = 30*nf//100 if tracker==1 else 50*nf//100
                 )
                 tmp_df = data_df.copy()[rfe_features]
                 tmp_df['outcome'] = data_df['outcome']
+                data_df = tmp_df
+                nf = len(data_df.columns)-1
+                print(f"\nNumber of features after RFE: {nf}")
+                tracker += 1
 
             elif method == 'kbest':
                 kbest_features = utils.features.select_k_best(
                     data_df,
-                    k = 300 if idx==1 else 150
+                    k = 30*nf//100 if tracker==1 else 50*nf//100
                 )
                 tmp_df = data_df.copy()[kbest_features]
                 tmp_df['outcome'] = data_df['outcome']
-
-        data_df = tmp_df
+                data_df = tmp_df
+                nf = len(data_df.columns)-1
+                print(f"\nNumber of features after SelectKBest: {nf}")
+                tracker += 1        
     
     return data_df
 
@@ -146,6 +173,7 @@ def manipulate_features(data_df):
 def prepare_splits(data_df, test_size=0.2, random_state=1):
 
     if existing_splits: 
+        print("\nUsing existing splits")
         # use exact same split as in the SPLITS_DIR
         raw_dataset = load_from_disk(SPLITS_DIR)
         # eg. train_df contains instances in raw_dataset['train']
@@ -153,7 +181,7 @@ def prepare_splits(data_df, test_size=0.2, random_state=1):
         train_df = data_df[data_df.index.isin(raw_dataset['train']['pandas_idx'])]
         test_df = data_df[data_df.index.isin(raw_dataset['test']['pandas_idx'])]
     else:
-        # split into train and test
+        print("\nCreating new splits")
         train_df, test_df = train_test_split(
             data_df, 
             test_size=test_size, 
@@ -272,6 +300,7 @@ def main(args):
     test_idxs = X_test.index.tolist()
 
     ''' Training '''
+    print("\nData ready; starting training")
     model = train(X_train, y_train)
 
     ''' Evaluation '''
@@ -281,9 +310,7 @@ def main(args):
     ''' Model stats'''
     model_stats = {
         'model': model.__class__.__name__,
-        'feat_set': selection_methods,
-        'feat_types': feature_types,
-        'ensemble': ensemble,
+        'args': vars(args),
         'coefficients': {
             feature: coef for feature, coef 
             in zip(X_train.columns, model.coef_[0])
@@ -308,7 +335,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--features_filename",
                         type=str,
-                        help="file with feautures extracted from LLM responses (csv or gz in output/)")
+                        help="file with feautures extracted from LLM responses (csv or gz in features/)")
     parser.add_argument("--responses_filename",
                         type=str,
                         help="file with responses; used to extract the gold labels (jsonl in responses/)")
@@ -317,7 +344,7 @@ if __name__ == "__main__":
                         help="include --save to save the model, predictions, stats")
     parser.add_argument("--selection_methods",
                         default="all",
-                        choices=["all", "col", "col-rfe", "col-kbest", "col-rfe-kbest", "col-kbest-rfe"],
+                        choices=["all", "col", "rfe", "kbest", "col-rfe", "col-kbest", "kbest-rfe", "rfe-kbest", "col-rfe-kbest", "col-kbest-rfe"],
                         help="methods to use for feature selection")
     parser.add_argument("--ensemble",
                         action="store_true",
@@ -334,9 +361,12 @@ if __name__ == "__main__":
     parser.add_argument("--existing_splits",
                         action="store_true",
                         help="include --existing_splits to use existing splits as for transformers models")
+    parser.add_argument("--balance",
+                        action="store_true",
+                        help="include --balance to balance the dataset")
     
     args = parser.parse_args()
-    print(args)
+    print(f"\nArguments:\n{pp.pformat(vars(args))}\n")
     main(args)
 
 
