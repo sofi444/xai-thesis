@@ -14,6 +14,7 @@ Feature extraction steps:
 
 import subprocess as sp
 import os
+import shutil
 import argparse
 
 
@@ -176,7 +177,7 @@ def main(args):
         raise Exception("Error merging features")
 
     
-    '''8. RENAME MERGED FEATURES FILE'''
+    '''8. MOVE & RENAME MERGED FEATURES FILE'''
 
     tmp_merged_features_filepath = os.path.join(
         FEATURE_EXTRACTION_DIR,
@@ -186,12 +187,14 @@ def main(args):
     )
 
     run_id = args.in_file.split("/")[-1].split("_")[0]
-    features_filepath = tmp_merged_features_filepath.replace(
-        "merged_features",
-        f"{run_id}_features")
-    
-    os.rename(tmp_merged_features_filepath, features_filepath)
-    print(f"+++ All done!\n\tFinal features file: {features_filepath}")
+    new_features_filepath = os.path.join(
+        FEATURE_EXTRACTION_DIR,
+        "features"
+        f"{run_id}_trad_features.csv"
+    )
+    shutil.move(tmp_merged_features_filepath, new_features_filepath)
+
+    print(f"+++ All done!\n\tFinal features file: {new_features_filepath}")
 
 
 
