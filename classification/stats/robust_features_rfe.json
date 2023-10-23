@@ -1,0 +1,882 @@
+{
+    "nwords": {
+        "coefficient": -0.79716,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Anticipation_EmoLex": {
+        "coefficient": 0.39654,
+        "p_value": 0.01108,
+        "vif": 1.0
+    },
+    "attention": {
+        "coefficient": -1.01314,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "vader_neutral": {
+        "coefficient": 0.50713,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Ngtv_GI": {
+        "coefficient": 0.44861,
+        "p_value": 0.00038,
+        "vif": 1.0
+    },
+    "Power_GI": {
+        "coefficient": -0.76915,
+        "p_value": 0.00013,
+        "vif": 1.0
+    },
+    "Feel_GI": {
+        "coefficient": -0.73363,
+        "p_value": 3e-05,
+        "vif": 1.0
+    },
+    "Undrst_GI": {
+        "coefficient": 0.96733,
+        "p_value": 0.03702,
+        "vif": 1.0
+    },
+    "Econ_2_GI": {
+        "coefficient": -0.50606,
+        "p_value": 0.00411,
+        "vif": 1.0
+    },
+    "Econ_GI": {
+        "coefficient": -1.09186,
+        "p_value": 0.00016,
+        "vif": 1.0
+    },
+    "Polit_GI": {
+        "coefficient": 0.7795,
+        "p_value": 0.03807,
+        "vif": 1.0
+    },
+    "Coll_GI": {
+        "coefficient": 0.53986,
+        "p_value": 0.00046,
+        "vif": 1.0
+    },
+    "Socrel_GI": {
+        "coefficient": 0.75315,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Object_GI": {
+        "coefficient": 0.46914,
+        "p_value": 1e-05,
+        "vif": 1.0
+    },
+    "Tool_GI": {
+        "coefficient": 0.96073,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Know_GI": {
+        "coefficient": -1.11482,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Ought_GI": {
+        "coefficient": 0.34388,
+        "p_value": 0.03714,
+        "vif": 1.0
+    },
+    "Quan_GI": {
+        "coefficient": -0.80654,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Time_2_GI": {
+        "coefficient": -0.49354,
+        "p_value": 0.00052,
+        "vif": 1.0
+    },
+    "Name_GI": {
+        "coefficient": -0.41673,
+        "p_value": 0.00661,
+        "vif": 1.0
+    },
+    "Yes_GI": {
+        "coefficient": 0.97854,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Powgain_Lasswell": {
+        "coefficient": -0.45709,
+        "p_value": 0.01158,
+        "vif": 1.0
+    },
+    "Powoth_Lasswell": {
+        "coefficient": -0.89708,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Rctot_Lasswell": {
+        "coefficient": -0.61985,
+        "p_value": 0.02883,
+        "vif": 1.0
+    },
+    "Enloth_Lasswell": {
+        "coefficient": 0.60845,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Nation_Lasswell": {
+        "coefficient": 0.54017,
+        "p_value": 0.01657,
+        "vif": 1.0
+    },
+    "If_Lasswell": {
+        "coefficient": -0.86375,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Ritual_GI_neg_3": {
+        "coefficient": 0.47756,
+        "p_value": 0.02852,
+        "vif": 1.0
+    },
+    "Com_GI_neg_3": {
+        "coefficient": -0.83167,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Say_GI_neg_3": {
+        "coefficient": 0.6618,
+        "p_value": 0.00339,
+        "vif": 1.0
+    },
+    "Causal_GI_neg_3": {
+        "coefficient": -0.46715,
+        "p_value": 0.01882,
+        "vif": 1.0
+    },
+    "Ord_GI_neg_3": {
+        "coefficient": -0.52207,
+        "p_value": 0.00027,
+        "vif": 1.0
+    },
+    "Dist_GI_neg_3": {
+        "coefficient": 0.61012,
+        "p_value": 0.02646,
+        "vif": 1.0
+    },
+    "Time_GI_neg_3": {
+        "coefficient": 0.85621,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "No_GI_neg_3": {
+        "coefficient": -0.94025,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Negate_GI_neg_3": {
+        "coefficient": 0.52047,
+        "p_value": 0.00037,
+        "vif": 1.0
+    },
+    "Iav_GI_neg_3": {
+        "coefficient": -0.32767,
+        "p_value": 4e-05,
+        "vif": 1.0
+    },
+    "Powdoct_Lasswell_neg_3": {
+        "coefficient": -0.3697,
+        "p_value": 0.04063,
+        "vif": 1.0
+    },
+    "Rspoth_Lasswell_neg_3": {
+        "coefficient": 0.67305,
+        "p_value": 0.04211,
+        "vif": 1.0
+    },
+    "Affgain_Lasswell_neg_3": {
+        "coefficient": 0.60935,
+        "p_value": 0.04505,
+        "vif": 1.0
+    },
+    "Wlttran_Lasswell_neg_3": {
+        "coefficient": 0.90749,
+        "p_value": 0.0001,
+        "vif": 1.0
+    },
+    "Wlttot_Lasswell_neg_3": {
+        "coefficient": 0.77495,
+        "p_value": 3e-05,
+        "vif": 1.0
+    },
+    "Enlends_Lasswell_neg_3": {
+        "coefficient": 0.6155,
+        "p_value": 0.02937,
+        "vif": 1.0
+    },
+    "Relief_GALC_nouns": {
+        "coefficient": -0.5473,
+        "p_value": 0.04193,
+        "vif": 1.0
+    },
+    "Valence_nwords_nouns": {
+        "coefficient": 0.55849,
+        "p_value": 1e-05,
+        "vif": 1.0
+    },
+    "hu_liu_neg_perc_nouns": {
+        "coefficient": -1.00075,
+        "p_value": 1e-05,
+        "vif": 1.0
+    },
+    "Active_GI_nouns": {
+        "coefficient": 0.36926,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Passive_GI_nouns": {
+        "coefficient": -0.55965,
+        "p_value": 0.0007,
+        "vif": 1.0
+    },
+    "Econ_2_GI_nouns": {
+        "coefficient": 0.76736,
+        "p_value": 0.01263,
+        "vif": 1.0
+    },
+    "Econ_GI_nouns": {
+        "coefficient": 0.61985,
+        "p_value": 0.00195,
+        "vif": 1.0
+    },
+    "Relig_GI_nouns": {
+        "coefficient": -0.39329,
+        "p_value": 0.03797,
+        "vif": 1.0
+    },
+    "Hu_GI_nouns": {
+        "coefficient": 0.74284,
+        "p_value": 0.01301,
+        "vif": 1.0
+    },
+    "Comform_GI_nouns": {
+        "coefficient": -0.72302,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Com_GI_nouns": {
+        "coefficient": 0.88945,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Causal_GI_nouns": {
+        "coefficient": -0.76098,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Compare_GI_nouns": {
+        "coefficient": -0.44749,
+        "p_value": 0.00265,
+        "vif": 1.0
+    },
+    "Space_GI_nouns": {
+        "coefficient": 0.59516,
+        "p_value": 0.03168,
+        "vif": 1.0
+    },
+    "Negate_GI_nouns": {
+        "coefficient": -2.05529,
+        "p_value": 0.00015,
+        "vif": 1.0
+    },
+    "Sv_GI_nouns": {
+        "coefficient": -0.56057,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Rctot_Lasswell_nouns": {
+        "coefficient": -0.35145,
+        "p_value": 1e-05,
+        "vif": 1.0
+    },
+    "Tranlw_Lasswell_nouns": {
+        "coefficient": 0.6298,
+        "p_value": 0.00891,
+        "vif": 1.0
+    },
+    "Notlw_Lasswell_nouns": {
+        "coefficient": -1.83287,
+        "p_value": 0.00011,
+        "vif": 1.0
+    },
+    "Anticipation_EmoLex_verbs": {
+        "coefficient": -0.57237,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Positiv_GI_verbs": {
+        "coefficient": 0.76774,
+        "p_value": 0.01231,
+        "vif": 1.0
+    },
+    "Ngtv_GI_verbs": {
+        "coefficient": 0.62945,
+        "p_value": 0.00127,
+        "vif": 1.0
+    },
+    "Strong_GI_verbs": {
+        "coefficient": -0.50844,
+        "p_value": 0.00687,
+        "vif": 1.0
+    },
+    "Passive_GI_verbs": {
+        "coefficient": -0.73827,
+        "p_value": 0.00256,
+        "vif": 1.0
+    },
+    "Pleasur_GI_verbs": {
+        "coefficient": -1.01109,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Emot_GI_verbs": {
+        "coefficient": -0.77144,
+        "p_value": 2e-05,
+        "vif": 1.0
+    },
+    "Comform_GI_verbs": {
+        "coefficient": 0.78372,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Decreas_GI_verbs": {
+        "coefficient": -0.66698,
+        "p_value": 0.02103,
+        "vif": 1.0
+    },
+    "Know_GI_verbs": {
+        "coefficient": 1.27115,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Ought_GI_verbs": {
+        "coefficient": 0.93061,
+        "p_value": 0.00511,
+        "vif": 1.0
+    },
+    "Iav_GI_verbs": {
+        "coefficient": 0.49428,
+        "p_value": 0.01125,
+        "vif": 1.0
+    },
+    "Sv_GI_verbs": {
+        "coefficient": 0.36966,
+        "p_value": 5e-05,
+        "vif": 1.0
+    },
+    "Powpt_Lasswell_verbs": {
+        "coefficient": 0.82334,
+        "p_value": 0.00232,
+        "vif": 1.0
+    },
+    "Rcethic_Lasswell_verbs": {
+        "coefficient": 0.50553,
+        "p_value": 0.03232,
+        "vif": 1.0
+    },
+    "Wlbtot_Lasswell_verbs": {
+        "coefficient": 0.51844,
+        "p_value": 0.0227,
+        "vif": 1.0
+    },
+    "Enlends_Lasswell_verbs": {
+        "coefficient": -0.61093,
+        "p_value": 0.00048,
+        "vif": 1.0
+    },
+    "Enloth_Lasswell_verbs": {
+        "coefficient": -0.31415,
+        "p_value": 0.00192,
+        "vif": 1.0
+    },
+    "Enltot_Lasswell_verbs": {
+        "coefficient": -1.02434,
+        "p_value": 0.03998,
+        "vif": 1.0
+    },
+    "Ptlw_Lasswell_verbs": {
+        "coefficient": -0.94743,
+        "p_value": 0.03916,
+        "vif": 1.0
+    },
+    "Surelw_Lasswell_verbs": {
+        "coefficient": -0.86285,
+        "p_value": 0.00521,
+        "vif": 1.0
+    },
+    "Timespc_Lasswell_verbs": {
+        "coefficient": -1.00439,
+        "p_value": 0.00957,
+        "vif": 1.0
+    },
+    "formlw_Lasswell_verbs": {
+        "coefficient": 0.75774,
+        "p_value": 0.00454,
+        "vif": 1.0
+    },
+    "Trust_EmoLex_adjectives": {
+        "coefficient": -0.31004,
+        "p_value": 8e-05,
+        "vif": 1.0
+    },
+    "Arousal_nwords_adjectives": {
+        "coefficient": -1.27769,
+        "p_value": 0.01415,
+        "vif": 1.0
+    },
+    "attention_adjectives": {
+        "coefficient": 0.88221,
+        "p_value": 0.01969,
+        "vif": 1.0
+    },
+    "hu_liu_prop_adjectives": {
+        "coefficient": 0.39383,
+        "p_value": 0.00022,
+        "vif": 1.0
+    },
+    "Pstv_GI_adjectives": {
+        "coefficient": 0.63984,
+        "p_value": 0.01063,
+        "vif": 1.0
+    },
+    "Affil_GI_adjectives": {
+        "coefficient": 0.76879,
+        "p_value": 0.01549,
+        "vif": 1.0
+    },
+    "Ngtv_GI_adjectives": {
+        "coefficient": -1.03029,
+        "p_value": 0.01727,
+        "vif": 1.0
+    },
+    "Polit_GI_adjectives": {
+        "coefficient": -0.38849,
+        "p_value": 0.04459,
+        "vif": 1.0
+    },
+    "Aquatic_GI_adjectives": {
+        "coefficient": -0.66232,
+        "p_value": 0.03634,
+        "vif": 1.0
+    },
+    "Food_GI_adjectives": {
+        "coefficient": 0.67255,
+        "p_value": 0.03883,
+        "vif": 1.0
+    },
+    "Increas_GI_adjectives": {
+        "coefficient": -1.20249,
+        "p_value": 0.00255,
+        "vif": 1.0
+    },
+    "Know_GI_adjectives": {
+        "coefficient": 0.67789,
+        "p_value": 0.01155,
+        "vif": 1.0
+    },
+    "Causal_GI_adjectives": {
+        "coefficient": 0.6415,
+        "p_value": 0.02724,
+        "vif": 1.0
+    },
+    "Quan_GI_adjectives": {
+        "coefficient": -1.05305,
+        "p_value": 0.01307,
+        "vif": 1.0
+    },
+    "Powpt_Lasswell_adjectives": {
+        "coefficient": 1.05971,
+        "p_value": 0.01709,
+        "vif": 1.0
+    },
+    "Powtot_Lasswell_adjectives": {
+        "coefficient": 0.60922,
+        "p_value": 0.01194,
+        "vif": 1.0
+    },
+    "Rsploss_Lasswell_adjectives": {
+        "coefficient": -0.89427,
+        "p_value": 0.00062,
+        "vif": 1.0
+    },
+    "Endslw_Lasswell_adjectives": {
+        "coefficient": -0.32754,
+        "p_value": 0.00037,
+        "vif": 1.0
+    },
+    "Surelw_Lasswell_adjectives": {
+        "coefficient": -0.42219,
+        "p_value": 0.00038,
+        "vif": 1.0
+    },
+    "Tension/Stress_GALC_adverbs": {
+        "coefficient": -0.49248,
+        "p_value": 0.01979,
+        "vif": 1.0
+    },
+    "vader_positive_adverbs": {
+        "coefficient": -0.63059,
+        "p_value": 0.01146,
+        "vif": 1.0
+    },
+    "Vice_GI_adverbs": {
+        "coefficient": 0.40196,
+        "p_value": 0.04926,
+        "vif": 1.0
+    },
+    "Causal_GI_adverbs": {
+        "coefficient": 0.33258,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Eval_2_GI_adverbs": {
+        "coefficient": -0.48773,
+        "p_value": 0.00042,
+        "vif": 1.0
+    },
+    "Quan_GI_adverbs": {
+        "coefficient": -0.35481,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Powcoop_Lasswell_adverbs": {
+        "coefficient": 0.66686,
+        "p_value": 0.00062,
+        "vif": 1.0
+    },
+    "If_Lasswell_adverbs": {
+        "coefficient": -0.59312,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "aptitude_nouns_neg_3": {
+        "coefficient": -0.82251,
+        "p_value": 0.01413,
+        "vif": 1.0
+    },
+    "hu_liu_prop_nouns_neg_3": {
+        "coefficient": -0.71467,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Weak_GI_nouns_neg_3": {
+        "coefficient": -1.04468,
+        "p_value": 0.00035,
+        "vif": 1.0
+    },
+    "Emot_GI_nouns_neg_3": {
+        "coefficient": -0.40487,
+        "p_value": 0.00357,
+        "vif": 1.0
+    },
+    "Need_GI_nouns_neg_3": {
+        "coefficient": -0.53621,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Perceiv_GI_nouns_neg_3": {
+        "coefficient": -0.45544,
+        "p_value": 0.01536,
+        "vif": 1.0
+    },
+    "Abs_GI_nouns_neg_3": {
+        "coefficient": -0.54863,
+        "p_value": 0.00034,
+        "vif": 1.0
+    },
+    "Dav_GI_nouns_neg_3": {
+        "coefficient": -0.34019,
+        "p_value": 0.00325,
+        "vif": 1.0
+    },
+    "Powaren_Lasswell_nouns_neg_3": {
+        "coefficient": 0.55,
+        "p_value": 0.00266,
+        "vif": 1.0
+    },
+    "Enlgain_Lasswell_nouns_neg_3": {
+        "coefficient": 0.58909,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Enloth_Lasswell_nouns_neg_3": {
+        "coefficient": -0.41645,
+        "p_value": 1e-05,
+        "vif": 1.0
+    },
+    "formlw_Lasswell_nouns_neg_3": {
+        "coefficient": 0.50895,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Amusement_GALC_verbs_neg_3": {
+        "coefficient": 0.89355,
+        "p_value": 0.01567,
+        "vif": 1.0
+    },
+    "Fear_EmoLex_verbs_neg_3": {
+        "coefficient": -0.59269,
+        "p_value": 0.0037,
+        "vif": 1.0
+    },
+    "Joy_EmoLex_verbs_neg_3": {
+        "coefficient": 0.50517,
+        "p_value": 0.00093,
+        "vif": 1.0
+    },
+    "Trust_EmoLex_verbs_neg_3": {
+        "coefficient": -0.70724,
+        "p_value": 2e-05,
+        "vif": 1.0
+    },
+    "attention_verbs_neg_3": {
+        "coefficient": -0.53397,
+        "p_value": 0.00018,
+        "vif": 1.0
+    },
+    "hu_liu_prop_verbs_neg_3": {
+        "coefficient": -0.89697,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Affil_GI_verbs_neg_3": {
+        "coefficient": -0.40642,
+        "p_value": 0.01406,
+        "vif": 1.0
+    },
+    "Weak_GI_verbs_neg_3": {
+        "coefficient": -0.56188,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Virtue_GI_verbs_neg_3": {
+        "coefficient": -0.5425,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Socrel_GI_verbs_neg_3": {
+        "coefficient": -1.2499,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Begin_GI_verbs_neg_3": {
+        "coefficient": -0.78699,
+        "p_value": 0.03185,
+        "vif": 1.0
+    },
+    "Powdoct_Lasswell_verbs_neg_3": {
+        "coefficient": -0.69134,
+        "p_value": 0.03257,
+        "vif": 1.0
+    },
+    "Wlbphys_Lasswell_verbs_neg_3": {
+        "coefficient": -0.30681,
+        "p_value": 0.00839,
+        "vif": 1.0
+    },
+    "Posaff_Lasswell_verbs_neg_3": {
+        "coefficient": -0.47284,
+        "p_value": 0.00021,
+        "vif": 1.0
+    },
+    "If_Lasswell_verbs_neg_3": {
+        "coefficient": 0.61727,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Notlw_Lasswell_verbs_neg_3": {
+        "coefficient": -0.36798,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Anxiety_GALC_adjectives_neg_3": {
+        "coefficient": -0.5711,
+        "p_value": 0.00457,
+        "vif": 1.0
+    },
+    "Positive_GALC_adjectives_neg_3": {
+        "coefficient": 0.77714,
+        "p_value": 0.00042,
+        "vif": 1.0
+    },
+    "Anticipation_EmoLex_adjectives_neg_3": {
+        "coefficient": -0.80123,
+        "p_value": 0.00038,
+        "vif": 1.0
+    },
+    "Fear_EmoLex_adjectives_neg_3": {
+        "coefficient": -0.47676,
+        "p_value": 0.01657,
+        "vif": 1.0
+    },
+    "Valence_nwords_adjectives_neg_3": {
+        "coefficient": 0.60196,
+        "p_value": 0.02103,
+        "vif": 1.0
+    },
+    "Econ_GI_adjectives_neg_3": {
+        "coefficient": 0.55173,
+        "p_value": 0.00368,
+        "vif": 1.0
+    },
+    "Role_GI_adjectives_neg_3": {
+        "coefficient": -1.19062,
+        "p_value": 0.00446,
+        "vif": 1.0
+    },
+    "Numb_GI_adjectives_neg_3": {
+        "coefficient": 0.73459,
+        "p_value": 0.00426,
+        "vif": 1.0
+    },
+    "Rel_GI_adjectives_neg_3": {
+        "coefficient": -1.22962,
+        "p_value": 0.04279,
+        "vif": 1.0
+    },
+    "Negate_GI_adjectives_neg_3": {
+        "coefficient": -0.47907,
+        "p_value": 0.04462,
+        "vif": 1.0
+    },
+    "Iav_GI_adjectives_neg_3": {
+        "coefficient": 0.49308,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "Skltot_Lasswell_adjectives_neg_3": {
+        "coefficient": -0.95241,
+        "p_value": 0.00011,
+        "vif": 1.0
+    },
+    "Endslw_Lasswell_adverbs_neg_3": {
+        "coefficient": -0.90483,
+        "p_value": 0.04,
+        "vif": 1.0
+    },
+    "lexical_density_types": {
+        "coefficient": 0.89022,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "gunningFog": {
+        "coefficient": -0.62646,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "syll_per_word": {
+        "coefficient": 0.63831,
+        "p_value": 0.00023,
+        "vif": 1.0
+    },
+    "ttr": {
+        "coefficient": 1.80164,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "long_words": {
+        "coefficient": -0.40843,
+        "p_value": 0.0104,
+        "vif": 1.0
+    },
+    "complex_words": {
+        "coefficient": 0.47317,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "past_tense": {
+        "coefficient": 0.49939,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "first_person": {
+        "coefficient": 0.65111,
+        "p_value": 0.01168,
+        "vif": 1.0
+    },
+    "SCONJ": {
+        "coefficient": 0.45329,
+        "p_value": 0.04383,
+        "vif": 1.0
+    },
+    "NOUN": {
+        "coefficient": 1.23078,
+        "p_value": 0.03068,
+        "vif": 1.0
+    },
+    "ADP": {
+        "coefficient": 1.13596,
+        "p_value": 0.00029,
+        "vif": 1.0
+    },
+    "VERB": {
+        "coefficient": 0.95028,
+        "p_value": 0.00084,
+        "vif": 1.0
+    },
+    "ADJ": {
+        "coefficient": 0.587,
+        "p_value": 0.0001,
+        "vif": 1.0
+    },
+    "PUNCT": {
+        "coefficient": 0.65447,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "reasonableness": {
+        "coefficient": 0.34182,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "impact_0": {
+        "coefficient": 0.43473,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "quality": {
+        "coefficient": -0.65935,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "justification_2": {
+        "coefficient": 0.36923,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "interactivity_0": {
+        "coefficient": -0.9578,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "interactivity_1": {
+        "coefficient": 0.58563,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "interactivity_2": {
+        "coefficient": 1.02057,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "interactivity_3": {
+        "coefficient": -0.80027,
+        "p_value": 0.0,
+        "vif": 1.0
+    },
+    "argumentative": {
+        "coefficient": 1.35341,
+        "p_value": 0.00116,
+        "vif": 1.0
+    }
+}
