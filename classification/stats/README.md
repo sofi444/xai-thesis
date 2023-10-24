@@ -19,5 +19,8 @@
 
 #### type of features
 + arg: only features from argument mining are used (from ArgQualityAdapters/)
-+ nothing: only traditional features are used (from tools in featureExtraction/)
++ nothing/trad: only traditional features are used (from tools in featureExtraction/)
 + all: both the feature types are used
+
+
+**robust feature/interactions files** contain the features that pass VIF and p-value test (see `notebooks/vif_significance_on_existing_set.ipynb` and `notebooks/feature_interactions.ipynb`)
