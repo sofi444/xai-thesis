@@ -18,8 +18,8 @@ def load_data(split:str='dev', dataset:str='commonsenseQA', num_instances:int=No
 
     DATASET_DIR = os.path.join(DATA_DIR, dataset)
     
-    if split not in ['train', 'dev', 'test', 'merged']:
-        raise ValueError("split must be train | dev | test | merged")
+    if split not in ['train', 'dev', 'test', 'merged', 'triggers']:
+        raise ValueError("split must be train | dev | test | merged | triggers")
     
     files_from_split = [f for f in os.listdir(DATASET_DIR) if split in f]
 
