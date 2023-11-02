@@ -5,7 +5,14 @@
         "TSBS_1" : "Answer: Let's work this out in a step by step way to be sure we have the right answer.",
         "TSBS_1_format" : "Answer: Let's work this out in a step by step way to be sure we have the right answer.\n{format_instructions}",
         "TSBS_bad": "Answer the question. Choose one of the five possible choices. Only one is correct. Think step by step.",
-        "TSBS_bad_format" : "Answer the question. Choose one of the five possible choices. Only one is correct. Think step by step.\n{format_instructions}"
+        "TSBS_bad_format" : "Answer the question. Choose one of the five possible choices. Only one is correct. Think step by step.\n{format_instructions}",
+        "force_TSBS": "You must choose exactly one of the given options.\nAnswer: Let's think step by step.",
+        "force_TSBS_1": "Out of the given options, you must always choose exactly one final answer.\nAnswer: Let's think step by step.",
+        "force_TSBS_2": "The only one correct answer: Let's think step by step.",
+        "force_TSBS_3": "Answer: Let's think step by step and choose exactly one of the give options.",
+        "force_TSBS_4": "You must choose maximum one of the given options (only one is correct) and at least one (there is always a correct answer).\nAnswer: Let's think step by step.",
+        "force_TSBS_5": "Answer: Out of these options, choose exactly one correct answer. Let's think step by step.",
+        "force_TSBS_6": "Select the single correct answer, keeping in mind that exactly one of the given options is the correct answer. Answer: Let's think step by step."
     },
     "instance": {
         "eq_semic": "Question: {question}\nA={choice_A}; B={choice_B}; C={choice_C}; D={choice_D}; E={choice_E}",
