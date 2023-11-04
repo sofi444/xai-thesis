@@ -189,7 +189,7 @@ def main(args):
     run_id = args.in_file.split("/")[-1].split("_")[0]
     new_features_filepath = os.path.join(
         FEATURE_EXTRACTION_DIR,
-        "features"
+        "features",
         f"{run_id}_trad_features.csv"
     )
     shutil.move(tmp_merged_features_filepath, new_features_filepath)
