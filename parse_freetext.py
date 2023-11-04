@@ -23,9 +23,9 @@ from tqdm import tqdm
 
 '''
 device('cuda') uses all gpus, set CUDA_VISIBLE_DEVICES before running script
-    CUDA_VISIBLE_DEVICES=0,1 python3 parse_feaures.py
+    CUDA_VISIBLE_DEVICES=0 python3 parse_freetext.py
 
-setting gpus as script ('cuda:0,1') give invald string error
+setting gpus as script ('cuda:0') give invald string error
 '''
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

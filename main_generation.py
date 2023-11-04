@@ -49,9 +49,9 @@ def main(args):
     # load data
     data = utils.data.flatten_CoQA_comprehension(
         utils.data.load_data(
-            split=args.data_split,
+            split=args.data_type,
             filtered=True,
-            num_instances=2000 if not args.full_run else None)
+            num_instances=20 if not args.full_run else None)
         )
     num_loaded = len(data)
     print(f"\tLoaded {num_loaded} instances")
@@ -101,6 +101,8 @@ def main(args):
                 'choice_E':instance["choice_E"]
                 },
                 return_only_outputs=True) # non batch call
+            
+            #print(f"Response:\n{response['text']}\n") # tmp
             
             responses.append(
                 {'idx':main_idx,
@@ -162,19 +164,21 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--data_split", 
-                        type=str, default="dev", 
-                        help="data split to use")
+    parser.add_argument("--data_type", 
+                        type=str, default="dev",
+                        choices=["train", "dev", "test", "merged", "triggers"],
+                        help="data to use for generation: split | 'merged' | 'triggers'")
     parser.add_argument("--model", 
                         type=str, 
                         default="openai_chat", 
+                        choices=["openai_chat", "llama2_chat", "llama2_chat_local"],
                         help="model to use: openai_chat | llama2_chat | llama2_chat_local")
     parser.add_argument("--use_azure", 
                         action='store_true', 
                         help="include to use OpenAI models from Azure, omit otherwise")
     parser.add_argument("--full_run",
                         action='store_true',
-                        help="include to load all instances of data, omit to only load 3 instances")
+                        help="include to load all instances of data, omit to only load n instances")
     parser.add_argument("--prompting_type",
                         type=str,
                         default="base_TSBS",
