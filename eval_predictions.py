@@ -98,7 +98,7 @@ if __name__ == "__main__":
                         help="parsed responses file to evaluate: rel path | file name")
     parser.add_argument("--split",
                         type=str,
-                        help="split to evaluate on: train | dev | test | merged")
+                        help="split to evaluate on: train | dev | test | merged | triggers | new")
     
     args = parser.parse_args()
     evaluate_CoQA(args)

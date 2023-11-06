@@ -23,9 +23,9 @@ args = parser.parse_args()
 
 
 # Get run id and make sure it is the same for both files
-run_id = args.trad_features.split("/")[-1].split("_")[0]
+run_id = args.trad_features_file.split("/")[-1].split("_")[0]
 try:
-    assert run_id == args.arg_features.split("/")[-1].split("_")[0]
+    assert run_id == args.arg_features_file.split("/")[-1].split("_")[0]
 except AssertionError:
     print("\n! Run id mismatch; you are trying to merge features from different data")
     exit()

@@ -46,7 +46,7 @@ def load_freetext_responses(in_file:str, full_run:bool=False):
         PROJECT_DIR, "responses", in_file
     ) if "/" not in in_file else os.path.join(PROJECT_DIR, in_file)
 
-    N = 15
+    N = 5
     with open(filepath, "r") as f:
         responses = [json.loads(line) for line in f.readlines()]
         if not full_run:
@@ -289,7 +289,7 @@ if __name__ == "__main__":
                         help="include to add choices to the prompt, omit otherwise.")
     parser.add_argument("--og_data_split",
                         type=str,
-                        help="split of original data to get choices from: train | dev | test | merged")
+                        help="split of original data to get choices from: train | dev | test | merged | triggers | new")
     
 
     args = parser.parse_args()

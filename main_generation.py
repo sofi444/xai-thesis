@@ -166,8 +166,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--data_type", 
                         type=str, default="dev",
-                        choices=["train", "dev", "test", "merged", "triggers"],
-                        help="data to use for generation: split | 'merged' | 'triggers'")
+                        choices=["train", "dev", "test", "merged", "triggers", "new"],
+                        help="data to use for generation: split | 'merged' | 'triggers' | 'new'")
     parser.add_argument("--model", 
                         type=str, 
                         default="openai_chat", 

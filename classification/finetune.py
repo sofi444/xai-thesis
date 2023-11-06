@@ -21,10 +21,10 @@ logger = logging.get_logger("transformers")
 logger.info("INFO")
 logger.warning("WARN")
 
+
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SPLITS_DIR = os.path.join(PROJECT_DIR, "classification/split_datasets/coqa")
+SPLITS_DIR = os.path.join(PROJECT_DIR, "classification/split_datasets")
 MODELS_DIR = os.path.join(PROJECT_DIR, "classification/models")
-OUTPUT_DIR = os.path.join(PROJECT_DIR, 'classification/preds')
 LOGS_DIR = os.path.join(PROJECT_DIR, 'logs')
                                              
 
@@ -35,10 +35,7 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:200"
 seed = 42
 set_seed(seed)
 
-
-raw_dataset = load_from_disk(SPLITS_DIR)
 label_map = {'False': 0, 'True': 1}
-
 model_map = {
     'distilbert': 'distilbert-base-uncased',
     'deberta-small': 'microsoft/deberta-v3-small',
@@ -49,7 +46,7 @@ model_map = {
     'bert-large': 'bert-large-uncased'
 }
 
-device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:5' if torch.cuda.is_available() else 'cpu')
 torch.cuda.empty_cache()
 
 
@@ -64,7 +61,7 @@ class customTrainingArguments(TrainingArguments):
         The device used by this process.
         Name the device the number you use.
         """
-        return torch.device("cuda:2")
+        return torch.device("cuda:5")
 
     @property
     #@torch_required
@@ -117,13 +114,14 @@ def compute_metrics(pred):
     }
 
 
-def get_report(preds, split):
+def get_report(preds, split, raw_dataset):
     y_trues = [0 if raw_dataset[split]['label'][i]==False else 1 for i in range(len(raw_dataset[split]))]
     y_preds = preds.predictions.argmax(-1)
     print(classification_report(y_trues, y_preds, labels=[0,1]))
 
 
 def finetune(args):
+    raw_dataset = load_from_disk(os.path.join(SPLITS_DIR, args.data_splits_dir))
     model_name = model_map[args.model]
 
     # get rid of config and pass num_labels=2 to model instead of config
@@ -150,7 +148,7 @@ def finetune(args):
 
     #training_args = TrainingArguments(
     training_args = customTrainingArguments( # use customArg to enforce using one GPU
-        output_dir=OUTPUT_DIR,
+        output_dir=LOGS_DIR,
         num_train_epochs=10,
         per_device_train_batch_size=train_batch_size,
         per_device_eval_batch_size=eval_batch_size,
@@ -169,7 +167,7 @@ def finetune(args):
         metric_for_best_model='accuracy', # needed for early stopping
         greater_is_better=True, # if metric is loss, set to False
         fp16=True,
-        gradient_accumulation_steps=4, # virtual batch size (gr acc * batch size)
+        gradient_accumulation_steps=8, # virtual batch size (gr acc * batch size)
         seed=seed,
         full_determinism=True
     )
@@ -208,7 +206,7 @@ def finetune(args):
 
     ''' Eval '''
     for split in ['validation', 'test']:
-        get_report(trainer.predict(dataset[split]), split)
+        get_report(trainer.predict(dataset[split]), split, raw_dataset)
 
     ''' Save '''
     if args.save_model:
@@ -235,6 +233,10 @@ if __name__ == "__main__":
                         ])
     parser.add_argument("--save_model",
                         action="store_true")
+    parser.add_argument("--data_splits_dir",
+                        type=str,
+                        required=True,
+                        help="Name of directory with data splits (coqa | coqa_force)")
     
     args = parser.parse_args()
     finetune(args)
