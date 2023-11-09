@@ -3,14 +3,17 @@ import os
 import numpy as np
 import argparse
 import datetime
+import json
+import pandas as pd
 
 import torch
+import torch.nn as nn
 from transformers import AutoModel, AutoTokenizer, AutoConfig, AutoModelForSequenceClassification
 from transformers import Trainer, TrainingArguments, set_seed
 from transformers import DataCollatorWithPadding, default_data_collator
 from transformers import AdamW, get_cosine_schedule_with_warmup
 from transformers import EarlyStoppingCallback
-from datasets import load_from_disk
+from datasets import load_from_disk, Dataset, DatasetDict
 
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score, classification_report
 
@@ -26,6 +29,7 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SPLITS_DIR = os.path.join(PROJECT_DIR, "classification/split_datasets")
 MODELS_DIR = os.path.join(PROJECT_DIR, "classification/models")
 LOGS_DIR = os.path.join(PROJECT_DIR, 'logs')
+MAPS_DIR = os.path.join(PROJECT_DIR, 'maps')
                                              
 
 #os.environ["CUDA_VISIBLE_DEVICES"] = '2'
@@ -46,7 +50,7 @@ model_map = {
     'bert-large': 'bert-large-uncased'
 }
 
-device = torch.device('cuda:5' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
 torch.cuda.empty_cache()
 
 
@@ -61,7 +65,7 @@ class customTrainingArguments(TrainingArguments):
         The device used by this process.
         Name the device the number you use.
         """
-        return torch.device("cuda:5")
+        return torch.device("cuda:3")
 
     @property
     #@torch_required
@@ -77,6 +81,22 @@ class customTrainingArguments(TrainingArguments):
         # I set to one manullay
         self._n_gpu = 1
         return self._n_gpu
+
+
+class CustomTrainer(Trainer):
+    def compute_loss(self, model, inputs, return_outputs=False):
+        inputs = inputs.to(device)
+        model = model.to(device)
+        labels = inputs.get("labels")
+        labels = labels.to(device)
+        # forward pass
+        outputs = model(**inputs)
+        logits = outputs.get('logits')
+        logits = logits.to(device)
+        # compute custom loss
+        loss_fct = nn.CrossEntropyLoss(weight=torch.tensor([2.0, 1.0]).to(device))
+        loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+        return (loss, outputs) if return_outputs else loss
 
 
 def tokenize_and_mask(raw_data):
@@ -120,8 +140,57 @@ def get_report(preds, split, raw_dataset):
     print(classification_report(y_trues, y_preds, labels=[0,1]))
 
 
-def finetune(args):
+def get_raw_dataset(args):
     raw_dataset = load_from_disk(os.path.join(SPLITS_DIR, args.data_splits_dir))
+    
+    if args.exclude_errors:
+        errors_map = json.load(open(os.path.join(MAPS_DIR, 'errors_idx_uuid_map.json')))
+        errors_idxs = [int(idx) for idx in errors_map.keys()]
+
+        # Remove instances with pandas_idx in errors_idxs
+        raw_dataset['train'] = raw_dataset['train'].filter(
+            lambda x: x['pandas_idx'] not in errors_idxs
+        )
+        raw_dataset['validation'] = raw_dataset['validation'].filter(
+            lambda x: x['pandas_idx'] not in errors_idxs
+        )
+        raw_dataset['test'] = raw_dataset['test'].filter(
+            lambda x: x['pandas_idx'] not in errors_idxs
+        )
+
+    if args.balance_dataset:
+        # False is the minority class
+        # Balance the dataset by removing True instances
+        # So that the number of False and True instances is the same
+        # (Only for train)
+        false_instances = raw_dataset['train'].filter(
+            lambda x: x['label'] == False
+        )
+        true_instances = raw_dataset['train'].filter(
+            lambda x: x['label'] == True
+        )
+        num_false = len(false_instances)
+        num_true = len(true_instances)
+
+        # Randomly sample num_false instances to keep from true_instances
+        true_instances = true_instances.shuffle(seed=seed).select(range(num_false))
+
+        # Rebuild raw_dataset['train']
+        # Concatenate false_instances and true_instances
+        # Shuffle
+        raw_dataset['train'] = Dataset.from_pandas(
+            pd.concat([false_instances.to_pandas(), true_instances.to_pandas()])
+        ).shuffle(seed=seed)
+        raw_dataset['train'] = raw_dataset['train'].remove_columns('__index_level_0__')
+
+    print(raw_dataset)
+    return raw_dataset
+
+
+
+def finetune(args):
+    
+    raw_dataset = get_raw_dataset(args)
     model_name = model_map[args.model]
 
     # get rid of config and pass num_labels=2 to model instead of config
@@ -189,6 +258,7 @@ def finetune(args):
         num_training_steps=total_steps,
     )
 
+    #trainer = CustomTrainer(
     trainer = Trainer(
         model=model,
         tokenizer=tokenizer,
@@ -237,6 +307,12 @@ if __name__ == "__main__":
                         type=str,
                         required=True,
                         help="Name of directory with data splits (coqa | coqa_force)")
+    parser.add_argument("--exclude_errors",
+                        action="store_true",
+                        help="Exclude instances with multiple answers and no answer (errors)")
+    parser.add_argument("--balance_dataset",
+                        action="store_true",
+                        help="Balance the dataset by removing True instances")
     
     args = parser.parse_args()
     finetune(args)
