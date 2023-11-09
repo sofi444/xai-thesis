@@ -108,6 +108,10 @@ def merge_and_filter(features_df, labels_df, only_numeric=True):
     except:
         raise AssertionError(f"Length of features_df ({len(features_df)}) and labels_df ({len(labels_df)}) do not match.")
 
+    # drop response column (why is it even there?)
+    if "response" in features_df.columns:
+        features_df.drop(columns=["response"], inplace=True)
+        
     data_df = pd.merge(
         features_df, labels_df, left_index=True, right_index=True
     )
@@ -118,6 +122,7 @@ def merge_and_filter(features_df, labels_df, only_numeric=True):
 
     if only_numeric:
         if len(data_df.select_dtypes(exclude=['int64', 'float64']).columns) > 1:
+            print(data_df.select_dtypes(exclude=['int64', 'float64']).columns)
             raise ValueError("Found non-numeric columns. The only non-numeric column should be the outcome/label column.")
     
     return data_df
