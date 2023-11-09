@@ -23,6 +23,7 @@ import os
 import shap
 import torch
 import argparse
+import json
 import pickle as pkl
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -31,21 +32,12 @@ from transformers import TextClassificationPipeline
 from datasets import load_from_disk
 
 
-device = torch.device('cuda:8' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
 torch.cuda.empty_cache()
 
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(PROJECT_DIR, "classification/models")
-SPLITS_DIR = os.path.join(PROJECT_DIR, "classification/split_datasets/coqa")
-SHAP_DIR = os.path.join(PROJECT_DIR, "classification/shap_values/coqa")
-
-models_map = {'distilbert': 'distilbert-base-uncased_13091207',
-            'bert': 'bert_14102004',
-            'bert-large': 'bert-large_14101938',
-            'roberta': 'roberta_14102014',
-            'deberta': 'deberta_14102242'}
-
 
 
 def main(args):
@@ -66,6 +58,15 @@ def main(args):
 
     # Load data splits
     dataset = load_from_disk(os.path.join(SPLITS_DIR))
+    if 'errors' in args.data_type:
+        # Load errors map
+        with open(os.path.join(PROJECT_DIR, "maps/errors_idx_uuid_map.json"), "r") as f:
+            errors_map = json.load(f)
+        errors_ids = [int(idx) for idx in errors_map.keys()]
+        # Remove from dataset instances with pandas_idx in errors_ids
+        dataset[args.split] = dataset[args.split].filter(
+            lambda x: x['pandas_idx'] not in errors_ids
+        )
 
     # Get SHAP values
     mask_tokens = [
@@ -107,8 +108,28 @@ if __name__ == "__main__":
                         choices=["mask", "empty", "both"])
     parser.add_argument("--model",
                         type=str,
-                        required=True,
-                        choices=["distilbert", "deberta", "roberta", "bert", "bert-large"])
+                        required=True)
+    parser.add_argument("--data_type",
+                        type=str,
+                        default="coqa")
                         
     args = parser.parse_args()
+
+    data_name = args.data_type.split('/')[0] if '/' in args.data_type else args.data_type
+    SPLITS_DIR = os.path.join(PROJECT_DIR, f"classification/split_datasets/{data_name}")
+    SHAP_DIR = os.path.join(PROJECT_DIR, f"classification/shap_values/{args.data_type}") # output
+
+    # Models trained on coqa (base)
+    if data_name == 'coqa':
+        models_map = {'distilbert': 'distilbert-base-uncased_13091207',
+                    'bert': 'bert_14102004',
+                    'bert-large': 'bert-large_14101938',
+                    'roberta': 'roberta_14102014',
+                    'deberta': 'deberta_14102242'}
+
+    # Models trained on coqa_force_aug
+    elif data_name == 'coqa_force_aug':
+        models_map = {'bert': 'bert_06111925',
+                    'bert_noerrors': 'bert_06111905'}
+    
     main(args)

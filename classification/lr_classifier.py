@@ -40,8 +40,9 @@ RESPONSES_DIR = os.path.join(PROJECT_DIR, "responses/")
 MODELS_DIR = os.path.join(PROJECT_DIR, "classification/models/")
 PREDS_DIR = os.path.join(PROJECT_DIR, "classification/preds/")
 STATS_DIR = os.path.join(PROJECT_DIR, "classification/stats/")
-SPLITS_DIR = os.path.join(PROJECT_DIR, "classification/split_datasets/coqa")
+SPLITS_DIR = os.path.join(PROJECT_DIR, "classification/split_datasets/coqa_force_aug")
 
+exclude_errors = True
 
 
 def load_x_y(features_filename, responses_filename):
@@ -176,6 +177,17 @@ def prepare_splits(data_df, test_size=0.2, random_state=1):
         print("\nUsing existing splits")
         # use exact same split as in the SPLITS_DIR
         raw_dataset = load_from_disk(SPLITS_DIR)
+        
+        if exclude_errors:
+            # Load errors map
+            with open(os.path.join(PROJECT_DIR, "maps/errors_idx_uuid_map.json"), "r") as f:
+                errors_map = json.load(f)
+            errors_ids = [int(idx) for idx in errors_map.keys()]
+            # Remove from dataset instances with pandas_idx in errors_ids
+            raw_dataset['train'] = raw_dataset['train'].filter(
+                lambda example: example['pandas_idx'] not in errors_ids
+            )
+
         # eg. train_df contains instances in raw_dataset['train']
         # based on the pandas_idx in raw_dataset['train']['pandas_idx']
         train_df = data_df[data_df.index.isin(raw_dataset['train']['pandas_idx'])]
