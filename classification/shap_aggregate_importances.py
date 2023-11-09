@@ -349,11 +349,11 @@ def main(args):
         if args.save:
             try:
                 with open(os.path.join(
-                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_class-avg_{args.n}grams_{args.sv_from_split}.json"
+                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_class-avg_{args.n}gram_{args.sv_from_split}.json"
                     ), "w") as f:
                     json.dump(class_avg_ngram_importance, f)
                 with open(os.path.join(
-                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_overall-avg_{args.n}grams_{args.sv_from_split}.json"
+                    SHAP_DIR, f"agg-sv_{args.sv_from_model}_overall-avg_{args.n}gram_{args.sv_from_split}.json"
                     ), "w") as f:
                     json.dump(overall_avg_ngram_importance, f)
             except:
@@ -432,17 +432,24 @@ if __name__ == "__main__":
     parser.add_argument("--frequency", action="store_true")
     parser.add_argument("--sv_from_split", type=str, default="test",
                         choices=["train", "test"])
+    parser.add_argument("--data_type", type=str, default="coqa",
+                        help="coqa | coqa_force | coqa_force_aug")
 
     args = parser.parse_args()
 
     PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    SHAP_DIR = os.path.join(PROJECT_DIR, "classification/shap_values/coqa")
+    SHAP_DIR = os.path.join(PROJECT_DIR, f"classification/shap_values/{args.data_type}")
+
+    data_name = args.data_type.split('/')[0] if '/' in args.data_type else args.data_type
 
     dataset = load_from_disk(
-        os.path.join(PROJECT_DIR, "classification/split_datasets/coqa")
+        os.path.join(PROJECT_DIR, f"classification/split_datasets/{data_name}")
         )[args.sv_from_split]
+
     # ! map is only for test set atm
-    map = json.load(open(os.path.join(PROJECT_DIR, "maps/idx_uuid_choices_map.json"), "r"))
+    map_name = f"idx_uuid_choices_map_{data_name}.json"
+    #map_name = 'idx_uuid_choices_map.json' # coqa
+    map = json.load(open(os.path.join(PROJECT_DIR, "maps", map_name), "r"))
 
     spacy_pipe = spacy.load('en_core_web_sm', disable=['parser', 'ner'])
     spacy_pipe.tokenizer = Tokenizer(spacy_pipe.vocab, token_match=re.compile(r'\S+').match)
