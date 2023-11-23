@@ -177,10 +177,10 @@ def main(args):
             output = model.generate(
                 input_ids=inputs['input_ids'],
                 attention_mask=inputs['attention_mask'],
-                temperature=0.1,
+                #temperature=0.1,
                 max_new_tokens=70,
                 do_sample=False,
-                top_p=0.5,
+                #top_p=0.5,
             )[0].to('cpu')
 
             output_decoded = tokenizer.decode(
