@@ -234,6 +234,10 @@ def main(args):
 
         ######### NGRAM LEVEL #########
         if args.aggregate_at_ngram_level:
+
+            # Clean tokens list, so that ngrams do no contain punctuation
+            # needed otherwise the resulting ngrams might not be of len n
+            tokens = [t.strip(" .,-\n\"\')(:?!") for t in tokens]
             ngrams = create_ngrams(tokens, args.n) # adds padding and returns a list of ngrams (strings)
 
             # Get SHAP values for ngrams
@@ -247,7 +251,8 @@ def main(args):
                     if token in ["[BOS]", "[EOS]"]:
                         ngram_shap_values.append(np.array([0.0, 0.0]))
                         padded_ngram = True
-                        continue
+                        continue 
+
                     token_idx = tokens.index(token, start_idx)
                     ngram_shap_values.append(values[token_idx])
                 
