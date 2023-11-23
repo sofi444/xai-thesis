@@ -27,6 +27,8 @@ from itertools import combinations
 from typing import List, Dict
 from tqdm import tqdm
 
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import utils.data
 
 
@@ -109,6 +111,8 @@ def filter_data(data_split_to_filter, sim_threshold:float, gramm_threshold:float
         else:
             print(f"!cond 1 (choice uniqueness) - {question} - {choices}\n")
 
+    print(f"Removed {len(data)-len(filtered_data)} instances from {data_split_to_filter} data.")
+
     return filtered_data
 
 
@@ -135,10 +139,10 @@ if __name__ == "__main__":
     sim_threshold = 0.88
     gramm_threshold = 80.00
 
-    filtered_data = filter_data(data_split_to_filter="train", 
+    filtered_data = filter_data(data_split_to_filter="dev", 
                                 sim_threshold=sim_threshold,
                                 gramm_threshold=gramm_threshold)
     
-    print(f"Instances in filtered data: {len(filtered_data)}")
+    #print(f"Instances in filtered data: {len(filtered_data)}")
 
-    save_filtered_data(data_split_to_filter="train", filtered_data=filtered_data)
+    #save_filtered_data(data_split_to_filter="train", filtered_data=filtered_data)
