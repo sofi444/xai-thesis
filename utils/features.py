@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import f_classif, chi2
+from sklearn.feature_selection import f_classif, chi2, mutual_info_classif
 from sklearn.feature_selection import SequentialFeatureSelector
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LogisticRegression
@@ -147,7 +147,7 @@ def select_k_best(data_df, k=50):
     print("\nRunning SelectKBest...")
 
     #selector = SelectKBest(f_classif, k=k)
-    selector = SelectKBest(chi2, k=k)
+    selector = SelectKBest(mutual_info_classif, k=k)
     selector.fit(
         X = data_df.drop(columns=["outcome"]), 
         y = data_df["outcome"]
