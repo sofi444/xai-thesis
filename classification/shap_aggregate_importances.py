@@ -444,6 +444,8 @@ if __name__ == "__main__":
 
     PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     SHAP_DIR = os.path.join(PROJECT_DIR, f"classification/shap_values/{args.data_type}")
+    if 'noerrors' in args.sv_filename:
+        SHAP_DIR = os.path.join(SHAP_DIR, 'no_errors')
 
     data_name = args.data_type.split('/')[0] if '/' in args.data_type else args.data_type
 
