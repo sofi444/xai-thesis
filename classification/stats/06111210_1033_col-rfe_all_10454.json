@@ -2,7 +2,7 @@
     "model": "LogisticRegression",
     "args": {
         "features_filename": "feature_extraction/features/06111210_all_features.csv.gz",
-        "responses_filename": "responses/06111210_parsed_turbo_10454_eval.jsonl",
+        "responses_filename": "06111210_parsed_turbo_10454_eval.jsonl",
         "save": true,
         "selection_methods": "col-rfe",
         "ensemble": false,
