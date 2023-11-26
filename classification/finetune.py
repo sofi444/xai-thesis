@@ -50,7 +50,7 @@ model_map = {
     'bert-large': 'bert-large-uncased'
 }
 
-device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 torch.cuda.empty_cache()
 
 
@@ -65,7 +65,7 @@ class customTrainingArguments(TrainingArguments):
         The device used by this process.
         Name the device the number you use.
         """
-        return torch.device("cuda:3")
+        return torch.device("cuda:2")
 
     @property
     #@torch_required
@@ -192,6 +192,7 @@ def finetune(args):
     
     raw_dataset = get_raw_dataset(args)
     model_name = model_map[args.model]
+    model_id = datetime.datetime.now().strftime("%d%m%H%M")
 
     # get rid of config and pass num_labels=2 to model instead of config
     model_config = AutoConfig.from_pretrained(model_name,
@@ -217,7 +218,7 @@ def finetune(args):
 
     #training_args = TrainingArguments(
     training_args = customTrainingArguments( # use customArg to enforce using one GPU
-        output_dir=LOGS_DIR,
+        output_dir=os.path.join(LOGS_DIR, f"{args.model}_{model_id}"),
         num_train_epochs=10,
         per_device_train_batch_size=train_batch_size,
         per_device_eval_batch_size=eval_batch_size,
@@ -280,7 +281,6 @@ def finetune(args):
 
     ''' Save '''
     if args.save_model:
-        model_id = datetime.datetime.now().strftime("%d%m%H%M")
         trainer.save_model(os.path.join(MODELS_DIR, f"{args.model}_{model_id}"))
         print(f"Saved model to {MODELS_DIR}/{args.model}_{model_id}")
 

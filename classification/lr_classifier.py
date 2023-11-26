@@ -34,17 +34,6 @@ from datasets import load_from_disk
 print('Done importing')
 
 
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FEATURES_DIR = os.path.join(PROJECT_DIR, "feature_extraction/featureExtraction/output/")
-RESPONSES_DIR = os.path.join(PROJECT_DIR, "responses/")
-MODELS_DIR = os.path.join(PROJECT_DIR, "classification/models/")
-PREDS_DIR = os.path.join(PROJECT_DIR, "classification/preds/")
-STATS_DIR = os.path.join(PROJECT_DIR, "classification/stats/")
-SPLITS_DIR = os.path.join(PROJECT_DIR, "classification/split_datasets/coqa_force_aug")
-
-exclude_errors = True
-
-
 def load_x_y(features_filename, responses_filename):
     
     # load features (x)
@@ -178,7 +167,7 @@ def prepare_splits(data_df, test_size=0.2, random_state=1):
         # use exact same split as in the SPLITS_DIR
         raw_dataset = load_from_disk(SPLITS_DIR)
         
-        if exclude_errors:
+        if args.exclude_errors:
             # Load errors map
             with open(os.path.join(PROJECT_DIR, "maps/errors_idx_uuid_map.json"), "r") as f:
                 errors_map = json.load(f)
@@ -187,6 +176,10 @@ def prepare_splits(data_df, test_size=0.2, random_state=1):
             raw_dataset['train'] = raw_dataset['train'].filter(
                 lambda example: example['pandas_idx'] not in errors_ids
             )
+            raw_dataset['test'] = raw_dataset['test'].filter(
+                lambda example: example['pandas_idx'] not in errors_ids
+            )
+            # not using validation set for LR
 
         # eg. train_df contains instances in raw_dataset['train']
         # based on the pandas_idx in raw_dataset['train']['pandas_idx']
@@ -241,16 +234,20 @@ def train(X_train, y_train):
 def save_model(model):
     filepath = os.path.join(MODELS_DIR, f"model_{id}_{run_id}.joblib")
     joblib.dump(model, filepath)
+    print("\nModel saved at: ", filepath)
 
 
 
 def save_predictions(y_pred, test_idxs):
     preds_filepath = os.path.join(PREDS_DIR, f"preds_{id}_{run_id}.json")
+    
     with open(preds_filepath, "w") as f:
         json.dump(
             {idx:pred for idx, pred in zip(test_idxs, y_pred.tolist())}, 
             f,
             indent=4)
+        
+    print("\nPredictions saved at: ", preds_filepath)
 
     
 
@@ -260,6 +257,8 @@ def save_stats(stats):
 
     with open(out_filepath, "w") as f:
         json.dump(stats, f, indent=4)
+    
+    print("\nStats saved at: ", out_filepath)
 
 
 
@@ -336,8 +335,6 @@ def main(args):
         save_model(model)
         save_predictions(y_pred, test_idxs)
         save_stats(model_stats)
-        print(f"\nSaved model, predictions and stats with id: {id}_{run_id}")
-
 
 
 
@@ -375,10 +372,26 @@ if __name__ == "__main__":
                         help="include --existing_splits to use existing splits as for transformers models")
     parser.add_argument("--balance",
                         action="store_true",
-                        help="include --balance to balance the dataset")
+                        help="include --balance to balance the dataset"),
+    parser.add_argument("--data_type",
+                        type=str,
+                        default="coqa",
+                        help="dataset type (coqa or coqa_force or coqa_force_aug)")
+    parser.add_argument("--exclude_errors",
+                        action="store_true",
+                        help="include --exclude_errors to exclude errors from the dataset")
     
     args = parser.parse_args()
     print(f"\nArguments:\n{pp.pformat(vars(args))}\n")
+
+    PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    FEATURES_DIR = os.path.join(PROJECT_DIR, "feature_extraction/featureExtraction/output/")
+    RESPONSES_DIR = os.path.join(PROJECT_DIR, "responses/")
+    MODELS_DIR = os.path.join(PROJECT_DIR, "classification/models/")
+    PREDS_DIR = os.path.join(PROJECT_DIR, "classification/preds/")
+    STATS_DIR = os.path.join(PROJECT_DIR, "classification/stats/")
+    SPLITS_DIR = os.path.join(PROJECT_DIR, f"classification/split_datasets/{args.data_type}/")
+
     main(args)
 
 

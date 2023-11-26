@@ -43,9 +43,12 @@ MODELS_DIR = os.path.join(PROJECT_DIR, "classification/models")
 def main(args):
 
     # Load fine-tuned model
-    path_to_model = os.path.join(MODELS_DIR, models_map[args.model])
-    model = AutoModelForSequenceClassification.from_pretrained(path_to_model)
-    tokenizer = AutoTokenizer.from_pretrained(path_to_model)
+    abs_path = "/mount/studenten-temp1/users/dpgo/xai-thesis/classification/models/bert_23111114_force_aug_noerrors"
+    #path_to_model = os.path.join(MODELS_DIR, models_map[args.model])
+    #model = AutoModelForSequenceClassification.from_pretrained(path_to_model)
+    #tokenizer = AutoTokenizer.from_pretrained(path_to_model)
+    model = AutoModelForSequenceClassification.from_pretrained(abs_path)
+    tokenizer = AutoTokenizer.from_pretrained(abs_path)
     model.to(device)
 
     pipe = TextClassificationPipeline(
@@ -129,7 +132,11 @@ if __name__ == "__main__":
 
     # Models trained on coqa_force_aug
     elif data_name == 'coqa_force_aug':
-        models_map = {'bert': 'bert_06111925',
-                    'bert_noerrors': 'bert_06111905'}
+        models_map = {
+            #'bert': 'bert_06111925',
+            #'bert_noerrors': 'bert_06111905'
+            'bert': 'bert_23111113_force_aug',
+            'bert_noerrors': 'bert_23111113_force_aug_noerrors'
+        }
     
     main(args)
